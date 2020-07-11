@@ -17,3 +17,7 @@ sass.render({
 }, function (err, result) {
     console.log(result);
 });
+
+if (args.includes('--watch') || args.includes('-w')) {
+    console.log(`I'd watch your file if that feature was included.`)
+}
