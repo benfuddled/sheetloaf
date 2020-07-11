@@ -7,7 +7,7 @@
     "sheetloaf": "./bin/index.js"
   },
   "scripts": {
-    "test": "node . \"./tmp/**/*.css\""
+    "test": "node . \"./test/thing.scss\""
   },
   "repository": {
     "type": "git",
