@@ -1,0 +1,31 @@
+{
+  "name": "sheetloaf",
+  "version": "0.0.1",
+  "description": "freshmade stylesheets for the whole family.",
+  "main": "./bin/index.js",
+  "bin": {
+    "sheetloaf": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "node . \"./tmp/**/*.css\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benjrichardson/sheetloaf.git"
+  },
+  "keywords": [
+    "scss",
+    "css",
+    "sass",
+    "processor"
+  ],
+  "author": "Benjamin Richardson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benjrichardson/sheetloaf/issues"
+  },
+  "homepage": "https://github.com/benjrichardson/sheetloaf#readme",
+  "dependencies": {
+    "sass": "^1.26.10"
+  }
+}
