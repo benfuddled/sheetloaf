@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/benjrichardson/sheetloaf#readme",
   "dependencies": {
+    "chokidar": "^3.4.0",
     "sass": "^1.26.10"
   }
 }
