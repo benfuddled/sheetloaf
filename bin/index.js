@@ -21,3 +21,8 @@ sass.render({
 if (args.includes('--watch') || args.includes('-w')) {
     console.log(`I'd watch your file if that feature was included.`)
 }
+
+if (args.includes('--dir') || args.includes('-d')) {
+    let dir = args[(args.indexOf('--dir') !== -1 ? args.indexOf('--dir') + 1 : args.indexOf('-d') + 1)];
+    console.log(`I'd output your file to ${dir} that feature was included.`)
+}
