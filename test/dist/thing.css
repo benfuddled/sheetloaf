@@ -1,1 +1,8 @@
-[object Object]
+body {
+  background: green;
+}
+body div {
+  color: red;
+}
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi90aGluZy5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0k7O0FBQ0E7RUFDSSIsImZpbGUiOiJ0aGluZy5jc3MifQ== */

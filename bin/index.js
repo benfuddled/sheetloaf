@@ -37,27 +37,18 @@ function renderSheet(filename) {
         outputStyle: (minified ? 'compressed' : 'expanded')
     }, function (err, result) {
 
-        //Using fs.stat() to check for the existence of a file before calling fs.open(), fs.readFile() or fs.writeFile() is not recommended. Instead, user code should open/read/write the file directly and handle the error raised if the file is not available.
+        try {
+            fs.mkdirSync(path.dirname(destination), { recursive: true });
+        } catch (err) {
+            if (err.code !== 'EEXIST') throw err
+        }
 
-        fs.stat(path.resolve(process.cwd(), './test/dist/'), function (err, stats) {
-            if (err === null) {
-                console.log('directory exists!');
-            } else {
-                fs.mkdir(path.resolve(process.cwd(), './test/dist/'), (err) => {
-                    //if (err) throw err;
-                    if (err) {
-                        console.log('lol, error');
-                    }
-                });
-            }
+        fs.writeFile(destination, result.css, (err) => {
+            // throws an error, you could also catch it here
+            if (err) throw err;
 
-            fs.writeFile(destination, result, (err) => {
-                // throws an error, you could also catch it here
-                if (err) throw err;
-
-                // success case, the file was saved
-                console.log('Lyric saved!');
-            });
+            // success case, the file was saved
+            console.log('file saved!');
         });
     });
 }
