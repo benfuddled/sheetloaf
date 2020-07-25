@@ -7,4 +7,10 @@
 
 WARNING: This project is still early on and does not do much of anything. Check back later. 
 
-cli args are the same as https://github.com/postcss/postcss-cli
+cli --use arg is the same as https://github.com/postcss/postcss-cli
+
+## FAQ
+
+> Can I use this with regular CSS files?
+
+You can, but there wouldn't be much benefit over using only PostCSS. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
