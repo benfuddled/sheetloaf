@@ -27,6 +27,8 @@
   "homepage": "https://github.com/benjrichardson/sheetloaf#readme",
   "dependencies": {
     "chokidar": "^3.4.0",
+    "fast-glob": "^3.2.4",
+    "postcss": "^7.0.32",
     "sass": "^1.26.10"
   }
 }
