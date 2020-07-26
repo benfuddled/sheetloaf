@@ -42,28 +42,29 @@ entries.forEach(function (filename) {
 
 function renderSheet(filename) {
     let destination = path.resolve(process.cwd(), outputDir, path.basename(filename, '.scss') + '.css');
-    sass.render({
+
+    //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks. 
+    let result = sass.renderSync({
         file: filename,
         sourceMap: true,
         sourceMapEmbed: true,
         outFile: destination,
         outputStyle: (minified ? 'compressed' : 'expanded')
-    }, function (err, result) {
-
-        try {
-            fs.mkdirSync(path.dirname(destination), { recursive: true });
-        } catch (err) {
-            if (err.code !== 'EEXIST') throw err
-        }
-
-        fs.writeFile(destination, result.css, (err) => {
-            // throws an error, you could also catch it here
-            if (err) throw err;
-
-            // success case, the file was saved
-            console.log('file saved!');
-        });
     });
+
+    try {
+        fs.mkdirSync(path.dirname(destination), { recursive: true });
+    } catch (err) {
+        if (err.code !== 'EEXIST') throw err
+    }
+
+    fs.writeFile(destination, result.css, (err) => {
+        // throws an error, you could also catch it here
+        if (err) throw err;
+
+        // success case, the file was saved
+        console.log('file saved!');
+    })
 }
 
 
