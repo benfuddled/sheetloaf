@@ -7,10 +7,16 @@
 
 WARNING: This project is still early on and does not do much of anything. Check back later. 
 
-cli --use arg is the same as https://github.com/postcss/postcss-cli
-
 ## FAQ
 
 > Can I use this with regular CSS files?
 
-You can, but there wouldn't be much benefit over using only PostCSS. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
+Yes, but you should use PostCSS directly in that case. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
+
+```
+Usage:
+  sheetloaf [input.scss] [OPTIONS] [-o|--output output.css] [--watch|-w]
+  sheetloaf <input.scss>... [OPTIONS] --dir <output-directory> [--watch|-w] -- does not work yet, need to makes list args
+  sheetloaf <input-directory> [OPTIONS] --dir <output-directory> [--watch|-w]
+  sheetloaf <input-glob-pattern> [OPTIONS] --dir <output-directory> [--watch|-w]
+```

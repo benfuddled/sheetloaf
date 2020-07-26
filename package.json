@@ -7,7 +7,8 @@
     "sheetloaf": "./bin/index.js"
   },
   "scripts": {
-    "test": "node . \"./test/thing.scss\" --watch --dir \"test\""
+    "test": "node . \"./test/thing.scss\" --watch --dir \"test\"",
+    "test2": "node . test/*.scss -o test/dist/"
   },
   "repository": {
     "type": "git",

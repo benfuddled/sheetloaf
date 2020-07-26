@@ -7,18 +7,29 @@ const fg = require('fast-glob');
 // Skip the first two, I don't care.
 const args = process.argv.slice(2);
 
+let sassOptions = {
+    outputStyle: 'expanded'
+}
+
 const minified = false;
 
 console.log("Hello!");
-console.log(`Input given was ${args[0]}`);
+
+let input = args[0];
+console.log(args[0], `this is the input!`);
+
+let outputDir = '';
+if (args.includes('--output') || args.includes('-o')) {
+    outputDir = args[(args.indexOf('--output') !== -1 ? args.indexOf('--output') + 1 : args.indexOf('-o') + 1)];
+    console.log(outputDir, `this is the output!`);
+}
+
 console.log(`All args are: ${args}`);
 
-var destination = './test/dist/';  //'./test/thing.scss'
-
 console.log(`command executed from: ${process.cwd()}`);
-console.log(`resolved path: ${path.resolve(process.cwd(), 'test/**/*.scss')}`);
+console.log(`resolved path: ${path.resolve(process.cwd(), input)}`);
 
-let entries = fg.sync([path.resolve(process.cwd(), 'test/**/*.scss')], { dot: true });
+let entries = fg.sync([path.resolve(process.cwd(), input)], { dot: true });
 console.log(`globbed entries: ${entries}`);
 
 entries.forEach(function (filename) {
@@ -28,7 +39,7 @@ entries.forEach(function (filename) {
 });
 
 function renderSheet(filename) {
-    let destination = path.resolve(process.cwd(), './test/dist/', path.basename(filename, '.scss') + '.css');
+    let destination = path.resolve(process.cwd(), outputDir, path.basename(filename, '.scss') + '.css');
     sass.render({
         file: filename,
         sourceMap: true,
