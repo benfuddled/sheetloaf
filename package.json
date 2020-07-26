@@ -4,7 +4,7 @@
   "description": "freshmade stylesheets for the whole family.",
   "main": "./bin/index.js",
   "bin": {
-    "sheetloaf": "./bin/index.js"
+    "sheetloaf": "./bin/sheetloaf"
   },
   "scripts": {
     "test": "node . \"./test/thing.scss\" --watch --dir \"test\"",
