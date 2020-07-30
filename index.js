@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const fg = require('fast-glob');
 
+/* LOOK INTO COMMANDER FOR CLI OPTIONS */
+
 // Skip the first two, I don't care.
 const args = process.argv.slice(2);
 
@@ -30,7 +32,7 @@ console.log(`command executed from: ${process.cwd()}`);
 console.log(`resolved path: ${path.resolve(process.cwd(), input)}`);
 
 // let fast-glob deal with resolving the path, idk why but it doesn't like it when I do it, specifically on
-// command prompt. POSIX works just fine with it.
+// windows command prompt. POSIX works just fine with it.
 let entries = fg.sync([input], { dot: true });
 console.log(`globbed entries: ${entries}`);
 

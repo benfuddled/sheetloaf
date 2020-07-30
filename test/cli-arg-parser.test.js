@@ -10,13 +10,14 @@ describe('CLI Arguments Test', () => {
         });
         it('Should throw an error if there is no argument after -o or --output', () => {
             let args = ['test/*.scss', '-o'];
-            let out = argParser.getOutputDir(args);
-            assert.equal(out, 'nope');
-            //TODO, this is not done.
+            try {
+                argParser.getOutputDir(args);
+            } catch (error) {
+                assert.equal(error, '--output or -o requires a filename or directory');
+            }
         });
         it('Should throw an error if -o or --output argument is not included', () => {
             let args = ['test/*.scss', 'test/dist/'];
-            let out;
             try {
                 argParser.getOutputDir(args);
             } catch (error) {
