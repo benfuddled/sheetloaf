@@ -16,6 +16,6 @@ Yes, but you should use PostCSS-CLI in that case. This project is intended to si
 ```
 Usage:
   sheetloaf [input.scss] [OPTIONS] [-o|--output output.css] [--watch|-w]
-  sheetloaf <input-directory> [OPTIONS] --dir <output-directory> [--watch|-w]
-  sheetloaf <input-glob-pattern> [OPTIONS] --dir <output-directory> [--watch|-w]
+  sheetloaf <input-directory> [OPTIONS] -o|--output <output-directory> [--watch|-w]
+  sheetloaf <input-glob-pattern> [OPTIONS] -o|--output <output-directory> [--watch|-w]
 ```

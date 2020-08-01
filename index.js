@@ -3,8 +3,7 @@ const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
 const fg = require('fast-glob');
-
-/* LOOK INTO COMMANDER FOR CLI OPTIONS */
+const argParser = require('./cli-arg-parser');
 
 // Skip the first two, I don't care.
 const args = process.argv.slice(2);
@@ -20,11 +19,8 @@ console.log("Hello!");
 let input = args[0];
 console.log(args[0], `this is the input!`);
 
-let outputDir = '';
-if (args.includes('--output') || args.includes('-o')) {
-    outputDir = args[(args.indexOf('--output') !== -1 ? args.indexOf('--output') + 1 : args.indexOf('-o') + 1)];
-    console.log(outputDir, `this is the output!`);
-}
+let outputDir = argParser.getOutputDir(args);
+console.log(outputDir, `this is the output!`);
 
 console.log(`All args are: ${args}`);
 

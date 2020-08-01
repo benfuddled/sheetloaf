@@ -25,4 +25,12 @@ describe('CLI Arguments Test', () => {
             }
         });
     });
+
+    describe('argParser.expandArgs() Test', () => {
+        it('Should return expanded arguments', () => {
+            let args = ['test/*.scss', '-ovr', '-t', '--longer'];
+            let out = argParser.expandArgs(args);
+            assert.deepEqual(out, ['test/*.scss', '-o', '-v', '-r', '-t', '--longer']);
+        });
+    });
 });
