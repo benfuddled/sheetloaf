@@ -20,9 +20,11 @@ Usage:
 
 Basic options:
   -o, --output          Output file/directory name                             [string]
+
+Sass Options:
   -w, --watch           Watch files for changes and recompile as needed       [boolean]
   -s, --style=<NAME>    Output style. [expanded (default), compressed]         [string]
 
-Options for when not using a config file:
+PostCSS-CLI Options:
   -u, --use             List of postcss plugins to use (not functional)         [array]
 ```
