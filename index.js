@@ -3,34 +3,26 @@ const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
 const fg = require('fast-glob');
-const argParser = require('./cli-arg-parser');
+const picomatch = require('picomatch');
+const parser = require('./cli-parser');
 
 // Skip the first two, I don't care.
 const args = process.argv.slice(2);
-
-let sassOptions = {
-    outputStyle: 'expanded'
-}
-
-const minified = false;
-
-console.log("Hello!");
+console.log(args);
 
 let input = args[0];
-console.log(args[0], `this is the input!`);
+let output = parser.getOutput(args);
+let watchFiles = parser.checkForOption(args, ['--watch', '-w']);
+let minifyOutput = parser.checkForOption(args, ['--style=compressed']);
 
-let outputDir = argParser.getOutputDir(args);
-console.log(outputDir, `this is the output!`);
 
-console.log(`All args are: ${args}`);
+let inputIsGlob = picomatch.scan(input).isGlob;
 
-console.log(`command executed from: ${process.cwd()}`);
-console.log(`resolved path: ${path.resolve(process.cwd(), input)}`);
-
-// let fast-glob deal with resolving the path, idk why but it doesn't like it when I do it, specifically on
-// windows command prompt. POSIX works just fine with it.
+// let fast-glob deal with resolving the path, idk why but it doesn't like it 
+// when I do it beforehand, specifically on windows command prompt. 
+// POSIX works just fine with it.
 let entries = fg.sync([input], { dot: true });
-console.log(`globbed entries: ${entries}`);
+console.log(`Globbed entries: ${entries}`);
 
 entries.forEach(function (filename) {
     if (path.basename(filename).charAt(0) !== '_') {
@@ -39,7 +31,12 @@ entries.forEach(function (filename) {
 });
 
 function renderSheet(filename) {
-    let destination = path.resolve(process.cwd(), outputDir, path.basename(filename, '.scss') + '.css');
+    let destination;
+    if (inputIsGlob === true) {
+        destination = path.resolve(process.cwd(), output, path.basename(filename, '.scss') + '.css');
+    } else {
+        destination = path.resolve(process.cwd(), output);
+    }
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks. 
     let result = sass.renderSync({
@@ -47,7 +44,7 @@ function renderSheet(filename) {
         sourceMap: true,
         sourceMapEmbed: true,
         outFile: destination,
-        outputStyle: (minified ? 'compressed' : 'expanded')
+        outputStyle: (minifyOutput ? 'compressed' : 'expanded')
     });
 
     try {
@@ -64,6 +61,9 @@ function renderSheet(filename) {
         console.log('file saved!');
     })
 }
+
+//console.log(`command executed from: ${process.cwd()}`);
+//console.log(`resolved path: ${path.resolve(process.cwd(), input)}`);
 
 
 // sass.render({

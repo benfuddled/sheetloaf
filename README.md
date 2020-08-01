@@ -15,7 +15,14 @@ Yes, but you should use PostCSS-CLI in that case. This project is intended to si
 
 ```
 Usage:
-  sheetloaf [input.scss] [OPTIONS] [-o|--output output.css] [--watch|-w]
-  sheetloaf <input-directory> [OPTIONS] -o|--output <output-directory> [--watch|-w]
-  sheetloaf <input-glob-pattern> [OPTIONS] -o|--output <output-directory> [--watch|-w]
+  sheetloaf [input.scss] [OPTIONS] [-o|--output output.css]
+  sheetloaf <input-glob-pattern> [OPTIONS] -o|--output <output-directory>
+
+Basic options:
+  -o, --output          Output file/directory name                             [string]
+  -w, --watch           Watch files for changes and recompile as needed       [boolean]
+  -s, --style=<NAME>    Output style. [expanded (default), compressed]         [string]
+
+Options for when not using a config file:
+  -u, --use             List of postcss plugins to use (not functional)         [array]
 ```

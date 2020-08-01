@@ -1,6 +1,6 @@
 /* LOOK INTO COMMANDER FOR CLI OPTIONS */
 
-function getOutputDir(args) {
+function getOutput(args) {
     args = expandArgs(args);
     let out;
     if (args.includes('--output') || args.includes('-o')) {
@@ -14,6 +14,12 @@ function getOutputDir(args) {
         throw "--output or -o argument required"
     }
     return out;
+}
+
+function checkForOption(args, flags) {
+    args = expandArgs(args);
+
+    return flags.some((flag) => { return args.includes(flag) });
 }
 
 // https://nullprogram.com/blog/2020/08/01/
@@ -39,9 +45,16 @@ function expandArgs(args) {
     return expanded;
 }
 
+function getOptionArgument(args, flag) {
+    // TODO
+
+    // if option contains =, split based on that rather than the param that follows
+}
+
 function checkDupes(args) {
     //TODO
 }
 
-exports.getOutputDir = getOutputDir;
+exports.getOutput = getOutput;
 exports.expandArgs = expandArgs;
+exports.checkForOption = checkForOption;
