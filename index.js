@@ -5,27 +5,75 @@ const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
 const version = require('./package.json').version;
-
 const { Command } = require('commander');
 const program = new Command();
+
+
+let input, output;
+
 program.version(version);
-
-
 // Angled brackets denote required argument, square denote optional
 program
-    .arguments('<source> <destination>')
+    .arguments('<source> <out>')
     .description('set input and output')
-    .action((source, destination) => {
-        console.log(source, destination);
+    .action((source, out) => {
+        input = source;
+        output = out;
     });
-
-
 program
-    .option('-s, --style <type>', 'Output style', 'expanded');
-
+    .option('-s, --style <type>', 'Output style', 'expanded')
+    .option('-w, --watch <type>', 'Watch files for changes and recompile as needed');
 program.parse(process.argv);
 
-console.log(`style: ${program.style}`);
+console.log(`Style: ${program.style}`);
+console.log(`Watch: ${program.watch}`);
+
+// Change/add check to see if input is dir or glob, there's 
+// a bug where if destination is a file but the output is
+// a dir it crashes
+
+// Also add option to mirror input dir structure if input is glob
+let inputIsGlob = picomatch.scan(input).isGlob;
+let entries = fg.sync([input], { dot: true });
+console.log(`Globbed entries: ${entries}`);
+
+entries.forEach(function (filename) {
+    if (path.basename(filename).charAt(0) !== '_') {
+        renderSheet(filename);
+    }
+});
+
+function renderSheet(filename) {
+    let destination;
+    if (inputIsGlob === true) {
+        destination = path.resolve(process.cwd(), output, path.basename(filename, '.scss') + '.css');
+    } else {
+        destination = path.resolve(process.cwd(), output);
+    }
+
+    //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
+    let result = sass.renderSync({
+        file: filename,
+        sourceMap: true,
+        sourceMapEmbed: true,
+        outFile: destination,
+        outputStyle: program.style
+    });
+
+    try {
+        fs.mkdirSync(path.dirname(destination), { recursive: true });
+    } catch (err) {
+        if (err.code !== 'EEXIST') throw err
+    }
+    console.log(destination);
+    fs.writeFile(destination, result.css, (err) => {
+        // throws an error, you could also catch it here
+        if (err) throw err;
+
+        // success case, the file was saved
+        console.log('file saved!');
+    })
+}
 
 
 /*
