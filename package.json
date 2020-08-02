@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"test/**/*.scss\" -o test/dist/ --style=expanded"
+    "test2": "node . \"test/**/*.scss\" --style=compressed"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/benjrichardson/sheetloaf#readme",
   "dependencies": {
     "chokidar": "^3.4.0",
+    "commander": "^6.0.0",
     "fast-glob": "^3.2.4",
     "picomatch": "^2.2.2",
     "postcss": "^7.0.32",

@@ -4,8 +4,21 @@ const path = require('path');
 const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
-const parser = require('./cli-parser');
+const version = require('./package.json').version;
 
+const { Command } = require('commander');
+const program = new Command();
+program.version(version);
+
+program
+    .option('-s, --style <type>', 'Output style', 'expanded');
+
+program.parse(process.argv);
+
+console.log(`style: ${program.style}`);
+
+
+/*
 // Skip the first two, I don't care.
 const args = process.argv.slice(2);
 console.log(args);
@@ -18,8 +31,8 @@ let minifyOutput = parser.checkForOption(args, ['--style=compressed']);
 
 let inputIsGlob = picomatch.scan(input).isGlob;
 
-// let fast-glob deal with resolving the path, idk why but it doesn't like it 
-// when I do it beforehand, specifically on windows command prompt. 
+// let fast-glob deal with resolving the path, idk why but it doesn't like it
+// when I do it beforehand, specifically on windows command prompt.
 // POSIX works just fine with it.
 let entries = fg.sync([input], { dot: true });
 console.log(`Globbed entries: ${entries}`);
@@ -38,7 +51,7 @@ function renderSheet(filename) {
         destination = path.resolve(process.cwd(), output);
     }
 
-    //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks. 
+    //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
     let result = sass.renderSync({
         file: filename,
         sourceMap: true,
@@ -73,7 +86,7 @@ function renderSheet(filename) {
 //     outFile: destination
 // }, function (err, result) {
 //     console.log(result);
-// });
+// });*/
 
 /*if (args.includes('--watch') || args.includes('-w')) {
     console.log(`I'd watch your file if that feature was included.`)
