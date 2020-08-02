@@ -10,6 +10,16 @@ const { Command } = require('commander');
 const program = new Command();
 program.version(version);
 
+
+// Angled brackets denote required argument, square denote optional
+program
+    .arguments('<source> <destination>')
+    .description('set input and output')
+    .action((source, destination) => {
+        console.log(source, destination);
+    });
+
+
 program
     .option('-s, --style <type>', 'Output style', 'expanded');
 
