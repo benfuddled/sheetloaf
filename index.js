@@ -38,6 +38,7 @@ entries.forEach(function (filename) {
 });
 
 function renderSheet(filename) {
+    console.log(`Rendering ${filename}`)
     let destination = parseDestination(filename, input, output);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
@@ -60,7 +61,7 @@ function renderSheet(filename) {
         if (err) throw err;
 
         // success case, the file was saved
-        console.log('file saved!');
+        console.log(`file saved to ${destination}`);
     })
 }
 
@@ -80,33 +81,57 @@ function parseDestination(filename, source, dest) {
         // Is file
         return path.resolve(process.cwd(), output);
     }
-    /*let dirStructure = path.relative(picomatch.scan(source).base, filename);
-    console.log(picomatch.scan(filename));
-    console.log(picomatch.scan(source));
-    console.log(picomatch.scan(source));
-    console.log(`dirStructure: ${path.relative(picomatch.scan(source).base, filename)}`)*/
-    /*console.log(path.isAbsolute('/argh/'));
-    console.log(picomatch.scan(filename));
-    console.log(picomatch.scan(source));
-    console.log(`input base: ${picomatch.scan(source).base}`);
-    console.log(`resolve: ${path.resolve(process.cwd(), 'test/thing/', '/argh/')}`)
-    console.log(picomatch.scan(dest));*/
-    // Change/add check to see if input is dir or glob, there's 
-    // a bug where if destination is a file but the output is
-    // a dir it crashes
-
-    // Also add option to mirror input dir structure if input is glob
-    let sourceIsGlob = picomatch.scan(source).isGlob;
-    let destISGlob = picomatch.scan(dest).isGlob;
-
-    console.log('-------------------');
-
-    if (sourceIsGlob === true) {
-        return path.resolve(process.cwd(), output, path.basename(filename, '.scss') + '.css');
-    } else {
-        return path.resolve(process.cwd(), output);
-    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*
