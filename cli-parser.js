@@ -22,6 +22,30 @@ function checkForOption(args, flags) {
     return flags.some((flag) => { return args.includes(flag) });
 }
 
+function getOptionArgument(args, flag) {
+
+    //maybe just use commander
+    args = expandArgs(args);
+    // string.includes(substring)
+
+    for (let i = 0; i < args.length; i++) {
+        //if ()
+    }
+
+    if (args.includes('--output') || args.includes('-o')) {
+        let index = (args.indexOf('--output') !== -1 ? args.indexOf('--output') + 1 : args.indexOf('-o') + 1);
+        out = args[index];
+
+        if (out === undefined || out === null) {
+            throw "--output or -o requires a filename or directory"
+        }
+    } else {
+        throw "--output or -o argument required"
+    }
+
+    // if option contains =, split based on that rather than the param that follows
+}
+
 // https://nullprogram.com/blog/2020/08/01/
 // TODO params where there's no space between the option and the argument.
 // I'm doing this all wrong btw, but at least I'm having fun.
