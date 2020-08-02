@@ -70,6 +70,7 @@ function validateSourceDest(source) {
 }
 
 function parseDestination(filename, source, dest) {
+    console.log(filename, source, dest);
     if (picomatch.scan(source).isGlob) {
         let dirStructure = path.relative(picomatch.scan(source).base, path.dirname(filename));
         let outName = path.basename(filename, path.extname(filename)) + '.css';

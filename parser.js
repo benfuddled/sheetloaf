@@ -1,6 +1,40 @@
+const path = require('path');
+const picomatch = require('picomatch');
+
+function parseDestination(filename, source, dest) {
+    if (picomatch.scan(source).isGlob) {
+        let dirStructure = path.relative(picomatch.scan(source).base, path.dirname(filename));
+        let outName = path.basename(filename, path.extname(filename)) + '.css';
+        return path.resolve(process.cwd(), dest, dirStructure, outName);
+    } else if (fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
+        //todo
+        //is dir
+        let dirStructure = path.relative(path.resolve(process.cwd(), source), path.dirname(filename));
+        let outName = path.basename(filename, path.extname(filename)) + '.css';
+        return path.resolve(process.cwd(), dest, dirStructure, outName);
+    } else {
+        // Is file
+        return path.resolve(process.cwd(), output);
+    }
+}
+
+exports.parseDestination = parseDestination;
+
+
+
+
+
+
+
+
+
+
+
 /* LOOK INTO COMMANDER FOR CLI OPTIONS */
 
-function getOutput(args) {
+
+
+/*function getOutput(args) {
     args = expandArgs(args);
     let out;
     if (args.includes('--output') || args.includes('-o')) {
@@ -81,4 +115,4 @@ function checkDupes(args) {
 
 exports.getOutput = getOutput;
 exports.expandArgs = expandArgs;
-exports.checkForOption = checkForOption;
+exports.checkForOption = checkForOption;*/
