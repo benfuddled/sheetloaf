@@ -53,7 +53,7 @@ function renderSheet(filename) {
     try {
         fs.mkdirSync(path.dirname(destination), { recursive: true });
     } catch (err) {
-        if (err.code !== 'EEXIST') throw err
+        if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
     }
 
     fs.writeFile(destination, result.css, (err) => {
@@ -74,9 +74,12 @@ function parseDestination(filename, source, dest) {
         let dirStructure = path.relative(picomatch.scan(source).base, path.dirname(filename));
         let outName = path.basename(filename, path.extname(filename)) + '.css';
         return path.resolve(process.cwd(), dest, dirStructure, outName);
-    } else if (false) {
+    } else if (fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
         //todo
         //is dir
+        let dirStructure = path.relative(path.resolve(process.cwd(), source), path.dirname(filename));
+        let outName = path.basename(filename, path.extname(filename)) + '.css';
+        return path.resolve(process.cwd(), dest, dirStructure, outName);
     } else {
         // Is file
         return path.resolve(process.cwd(), output);
