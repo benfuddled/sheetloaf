@@ -28,9 +28,7 @@ program
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.');
 program.parse(process.argv);
 
-console.log(`Style: ${program.style}`);
-console.log(`Watch: ${program.watch}`);
-
+console.log(parser.getPostCSSConfig(program.config));
 
 parser.parseInput(input, function (entries) {
     console.log(`Entries: ${entries}`);
@@ -63,7 +61,7 @@ function renderSheet(filename) {
         outputStyle: program.style
     }, function (err, result) {
         if (err === null) {
-            postcss().process(result.css.toString(), {
+            postcss([]).process(result.css.toString(), {
                 from: result.stats.entry,
                 to: destination,
                 map: true

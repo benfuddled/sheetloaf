@@ -45,5 +45,22 @@ function parseDestination(filename, source, dest) {
     }
 }
 
+function getPostCSSConfig(loc) {
+    let configLoc;
+    if (loc !== undefined) {
+        configLoc = path.resolve(process.cwd(), program.config, '/postcss.config.js');
+    } else {
+        try {
+            fs.lstatSync(path.resolve(process.cwd(), '/postcss.config.js'));
+            configLoc = path.resolve(process.cwd(), '/postcss.config.js')
+        } catch {
+            configLoc = null;
+        }
+    }
+
+    return configLoc;
+}
+
 exports.parseInput = parseInput;
 exports.parseDestination = parseDestination;
+exports.getPostCSSConfig = getPostCSSConfig;
