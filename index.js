@@ -22,7 +22,7 @@ program
         output = out;
     });
 program
-    .option('-s, --style=<NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
+    .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.');
 program.parse(process.argv);
 
@@ -194,5 +194,3 @@ if (args.includes('--dir') || args.includes('-d')) {
     let dir = args[(args.indexOf('--dir') !== -1 ? args.indexOf('--dir') + 1 : args.indexOf('-d') + 1)];
     console.log(`I'd output your file to ${dir} that feature was included.`)
 }*/
-
-module.exports.parseDestination = parseDestination;
