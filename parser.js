@@ -5,18 +5,22 @@ const picomatch = require('picomatch');
 
 async function parseInput(input, callback) {
     let entries = [];
-    if (fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
+    if (!picomatch.scan(input).isGlob && fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
         fs.readdir(input, (err, files) => {
-            files.forEach(file => {
-                let fullname = path.resolve(process.cwd(), input, file);
-                if (!fs.lstatSync(fullname).isDirectory()) {
-                    entries.push(fullname);
-                }
-            });
-            callback(entries);
+            if (err) {
+                throw err;
+            } else {
+                files.forEach(file => {
+                    let fullname = path.resolve(process.cwd(), input, file);
+                    if (!fs.lstatSync(fullname).isDirectory()) {
+                        entries.push(fullname);
+                    }
+                });
+                callback(entries);
+            }
         });
     } else {
-        entries = fg.sync([input], { dot: true });
+        entries = fg.sync([input], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
         callback(entries);
     }
 }
