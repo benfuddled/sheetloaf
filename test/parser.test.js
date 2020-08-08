@@ -45,4 +45,12 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
             assert.equal(parser.parseDestination(filename, source, out), expected);
         });
     });
+
+    describe('parser.parseInput() Test', () => {
+        it('Should get file listing correctly when a directory is used as input', () => {
+            //todo
+
+            assert.equal(5, 6);
+        });
+    });
 });
