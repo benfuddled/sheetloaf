@@ -7,6 +7,7 @@ const picomatch = require('picomatch');
 const version = require('./package.json').version;
 const parser = require('./parser');
 const { Command } = require('commander');
+const postcss = require('postcss');
 const program = new Command();
 
 
@@ -45,27 +46,49 @@ function renderSheet(filename) {
     let destination = parser.parseDestination(filename, input, output);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
-    let result = sass.renderSync({
+    /*let result = sass.renderSync({
         file: filename,
         sourceMap: true,
         sourceMapEmbed: true,
         outFile: destination,
         outputStyle: program.style
+    });*/
+
+    sass.render({
+        file: filename,
+        sourceMap: true,
+        sourceMapEmbed: true,
+        outFile: destination,
+        outputStyle: program.style
+    }, function (err, result) {
+        if (err === null) {
+            postcss().process(result.css.toString(), {
+                from: result.stats.entry,
+                to: destination,
+                map: true
+            }).then(postedResult => {
+                try {
+                    fs.mkdirSync(path.dirname(destination), { recursive: true });
+                } catch (err) {
+                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                }
+
+                fs.writeFile(destination, postedResult.css, (err) => {
+                    // throws an error, you could also catch it here
+                    if (err) throw err;
+
+                    // success case, the file was saved
+                    console.log(`File saved to ${destination}`);
+                })
+            }).catch(err => {
+                console.log(err);
+                console.log('EVEN SO');
+            })
+        } else {
+            //todo
+            console.log(`THAT'S AN ERROR IN ${filename} FELLA`);
+        }
     });
-
-    try {
-        fs.mkdirSync(path.dirname(destination), { recursive: true });
-    } catch (err) {
-        if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
-    }
-
-    fs.writeFile(destination, result.css, (err) => {
-        // throws an error, you could also catch it here
-        if (err) throw err;
-
-        // success case, the file was saved
-        console.log(`file saved to ${destination}`);
-    })
 }
 
 

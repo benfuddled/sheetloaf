@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"styles/\" \"dist/\" --style compressed"
+    "test2": "node . \"styles/**/*.scss\" \"dist/\" --style compressed"
   },
   "repository": {
     "type": "git",
