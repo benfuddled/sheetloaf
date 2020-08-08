@@ -5,24 +5,25 @@ const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
 const version = require('./package.json').version;
+const parser = require('./parser');
 const { Command } = require('commander');
 const program = new Command();
 
 
 let input, output;
 
-program.version(version);
+program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 // Angled brackets denote required argument, square denote optional
 program
-    .arguments('<source> <out>')
-    .description('set input and output')
+    .arguments('<source> <out>') // can change source to []
+    .description('Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source, out) => {
         input = source;
         output = out;
     });
 program
-    .option('-s, --style <type>', 'Output style', 'expanded')
-    .option('-w, --watch <type>', 'Watch files for changes and recompile as needed');
+    .option('-s, --style=<NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
+    .option('-w, --watch', 'Watch stylesheets and recompile when they change.');
 program.parse(process.argv);
 
 console.log(`Style: ${program.style}`);
@@ -39,7 +40,7 @@ entries.forEach(function (filename) {
 
 function renderSheet(filename) {
     console.log(`Rendering ${filename}`)
-    let destination = parseDestination(filename, input, output);
+    let destination = parser.parseDestination(filename, input, output);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
     let result = sass.renderSync({
@@ -64,29 +65,6 @@ function renderSheet(filename) {
         console.log(`file saved to ${destination}`);
     })
 }
-
-function validateSourceDest(source) {
-    let isGlob = picomatch.scan(source).isGlob;
-}
-
-function parseDestination(filename, source, dest) {
-    console.log(filename, source, dest);
-    if (picomatch.scan(source).isGlob) {
-        let dirStructure = path.relative(picomatch.scan(source).base, path.dirname(filename));
-        let outName = path.basename(filename, path.extname(filename)) + '.css';
-        return path.resolve(process.cwd(), dest, dirStructure, outName);
-    } else if (fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
-        //todo
-        //is dir
-        let dirStructure = path.relative(path.resolve(process.cwd(), source), path.dirname(filename));
-        let outName = path.basename(filename, path.extname(filename)) + '.css';
-        return path.resolve(process.cwd(), dest, dirStructure, outName);
-    } else {
-        // Is file
-        return path.resolve(process.cwd(), output);
-    }
-}
-
 
 
 
