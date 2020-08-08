@@ -1,6 +1,6 @@
 {
   "name": "sheetloaf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "freshmade stylesheets for the whole family.",
   "main": "./bin/index.js",
   "bin": {

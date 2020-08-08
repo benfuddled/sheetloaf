@@ -24,7 +24,8 @@ program
     });
 program
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
-    .option('-w, --watch', 'Watch stylesheets and recompile when they change.');
+    .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
+    .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.');
 program.parse(process.argv);
 
 console.log(`Style: ${program.style}`);
