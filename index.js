@@ -29,14 +29,31 @@ program.parse(process.argv);
 console.log(`Style: ${program.style}`);
 console.log(`Watch: ${program.watch}`);
 
-let entries = fg.sync([input], { dot: true });
-console.log(`Globbed entries: ${entries}`);
 
-entries.forEach(function (filename) {
-    if (path.basename(filename).charAt(0) !== '_') {
-        renderSheet(filename);
-    }
-});
+let entries = [];
+if (fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
+    fs.readdir(input, (err, files) => {
+        files.forEach(file => {
+            let fullname = path.resolve(process.cwd(), input, file);
+            if (!fs.lstatSync(fullname).isDirectory()) {
+                entries.push(fullname);
+            }
+        });
+        sortEntries();
+    });
+} else {
+    entries = fg.sync([input], { dot: true });
+}
+
+function sortEntries() {
+    console.log(`Entries: ${entries}`);
+
+    entries.forEach(function (filename) {
+        if (path.basename(filename).charAt(0) !== '_') {
+            renderSheet(filename);
+        }
+    });
+}
 
 function renderSheet(filename) {
     console.log(`Rendering ${filename}`)

@@ -13,6 +13,8 @@ WARNING: This project is still early on and does not do much of anything. Check 
 
 Yes, but you should use PostCSS-CLI in that case. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
+Likewise, if all you're looking for is to compile Sass, stick with Dart Sass.
+
 ```
 Usage:
   sheetloaf [input.scss] [output.css] [OPTIONS]
