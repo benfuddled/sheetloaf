@@ -1,6 +1,25 @@
 const path = require('path');
 const fs = require('fs');
+const fg = require('fast-glob');
 const picomatch = require('picomatch');
+
+async function parseInput(input, callback) {
+    let entries = [];
+    if (fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
+        fs.readdir(input, (err, files) => {
+            files.forEach(file => {
+                let fullname = path.resolve(process.cwd(), input, file);
+                if (!fs.lstatSync(fullname).isDirectory()) {
+                    entries.push(fullname);
+                }
+            });
+            callback(entries);
+        });
+    } else {
+        entries = fg.sync([input], { dot: true });
+        callback(entries);
+    }
+}
 
 function parseDestination(filename, source, dest) {
     if (picomatch.scan(source).isGlob || fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
@@ -22,4 +41,5 @@ function parseDestination(filename, source, dest) {
     }
 }
 
+exports.parseInput = parseInput;
 exports.parseDestination = parseDestination;
