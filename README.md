@@ -13,13 +13,13 @@ WARNING: This project is still early on and does not do much of anything. Check 
 
 Yes, but you should use PostCSS-CLI in that case. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
+Likewise, if all you're looking for is to compile Sass, stick with Dart Sass.
+
 ```
 Usage:
-  sheetloaf [input.scss] [OPTIONS] [-o|--output output.css]
-  sheetloaf <input-glob-pattern> [OPTIONS] -o|--output <output-directory>
-
-Basic options:
-  -o, --output          Output file/directory name                             [string]
+  sheetloaf [input.scss] [output.css] [OPTIONS]
+  sheetloaf <input-directory> <output-directory> [OPTIONS]
+  sheetloaf <input-glob-pattern> <output-directory> [OPTIONS] 
 
 Sass Options:
   -w, --watch           Watch files for changes and recompile as needed       [boolean]

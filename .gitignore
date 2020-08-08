@@ -3099,3 +3099,9 @@ node_modules/yargs-unparser/node_modules/yargs-parser/package.json
 node_modules/yargs-unparser/node_modules/yargs-parser/README.md
 node_modules/yargs-unparser/node_modules/yargs-parser/lib/tokenize-arg-string.js
 .vscode/settings.json
+node_modules/commander/CHANGELOG.md
+node_modules/commander/index.js
+node_modules/commander/LICENSE
+node_modules/commander/package.json
+node_modules/commander/Readme.md
+node_modules/commander/typings/index.d.ts
