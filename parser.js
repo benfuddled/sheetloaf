@@ -47,18 +47,18 @@ function parseDestination(filename, source, dest) {
 
 function getPostCSSConfig(loc) {
     let configLoc;
-    if (loc !== undefined) {
-        configLoc = path.resolve(process.cwd(), program.config, '/postcss.config.js');
+    if (loc != undefined) {
+        configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
     } else {
-        try {
-            fs.lstatSync(path.resolve(process.cwd(), '/postcss.config.js'));
-            configLoc = path.resolve(process.cwd(), '/postcss.config.js')
-        } catch {
-            configLoc = null;
-        }
+        configLoc = path.resolve(process.cwd(), 'postcss.config.js');
     }
 
-    return configLoc;
+    try {
+        fs.lstatSync(configLoc);
+        return require(configLoc).plugins;
+    } catch (err) {
+        return [];
+    }
 }
 
 exports.parseInput = parseInput;

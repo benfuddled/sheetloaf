@@ -17,7 +17,7 @@ program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 // Angled brackets denote required argument, square denote optional
 program
     .arguments('<source> <out>') // can change source to []
-    .description('Compile Sass to CSS and transform the output using PostCSS all in one command.')
+    .description('Compile Sass to CSS and transform the output using PostCSS all in one command. 🧆')
     .action((source, out) => {
         input = source;
         output = out;
@@ -28,7 +28,7 @@ program
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.');
 program.parse(process.argv);
 
-console.log(parser.getPostCSSConfig(program.config));
+let plugins = parser.getPostCSSConfig(program.config);
 
 parser.parseInput(input, function (entries) {
     console.log(`Entries: ${entries}`);
@@ -61,7 +61,7 @@ function renderSheet(filename) {
         outputStyle: program.style
     }, function (err, result) {
         if (err === null) {
-            postcss([]).process(result.css.toString(), {
+            postcss(plugins).process(result.css.toString(), {
                 from: result.stats.entry,
                 to: destination,
                 map: true
