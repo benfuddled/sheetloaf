@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+//todo semver and stdin
 const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
@@ -43,8 +44,6 @@ if (program.use !== undefined) {
 }
 
 parser.parseInput(input, function (entries) {
-    console.log(`Entries: ${entries}`);
-
     entries.forEach(function (filename) {
         if (path.basename(filename).charAt(0) !== '_') {
             renderSheet(filename);
@@ -53,7 +52,7 @@ parser.parseInput(input, function (entries) {
 });
 
 function renderSheet(filename) {
-    console.log(`Rendering ${filename}`)
+    console.log(`Rendering ${filename}...`)
     let destination = parser.parseDestination(filename, input, output);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
@@ -89,15 +88,13 @@ function renderSheet(filename) {
                     if (err) throw err;
 
                     // success case, the file was saved
-                    console.log(`File saved to ${destination}`);
+                    console.log(`Successfully written to ${destination}`);
                 })
             }).catch(err => {
                 console.log(err);
-                console.log('EVEN SO');
             })
         } else {
-            //todo
-            console.log(`THAT'S AN ERROR IN ${filename} FELLA`);
+            console.log(err.formatted);
         }
     });
 }
