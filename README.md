@@ -1,4 +1,4 @@
-# 🍖 Sheetloaf
+Fresh-made stylesheets for the whole family. 🍖 
 
 Compile sass files to CSS and transform using postcss, all in one command.
 
