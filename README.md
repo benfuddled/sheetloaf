@@ -1,11 +1,9 @@
-![sheetloaf: Fresh-made stylesheets for the whole family.](https://i.imgur.com/BHHYDm9.png)
+# 🍖 Sheetloaf
 
-# Benefits
+WARNING: This project is still early on and does not do much of anything. Check back later. 
 
 * No additional dependencies except for those required by sass and postcss
 * More to come...
-
-WARNING: This project is still early on and does not do much of anything. Check back later. 
 
 ## FAQ
 
@@ -31,5 +29,5 @@ Sass Options:
 
 PostCSS-CLI Options:
   --config <LOCATION>  Set a custom directory to look for a postcss config file.
-  -u, --use             List of postcss plugins to use (not functional)         [array]
+  -u, --use            List of postcss plugins to use (not functional)         [array]
 ```
