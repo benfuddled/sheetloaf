@@ -8,9 +8,9 @@ WARNING: This project is still early on and does not do much of anything. Check 
 
 > Can I use this with regular CSS files?
 
-Yes, but you should use PostCSS-CLI in that case, as you'll likely incur a performance hit. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
+Yes, but you should use [PostCSS-CLI](https://github.com/postcss/postcss-cli) in that case, as you'll be incurring a performance hit for no good reason. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
-Likewise, if all you're looking for is to compile Sass with no transformations, stick with Dart Sass.
+Likewise, if all you're looking for is to compile Sass with no transformations, you can stick with [Dart Sass](https://github.com/sass/dart-sass).
 
 ```
 Usage:
