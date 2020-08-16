@@ -2,18 +2,22 @@
   "name": "sheetloaf",
   "version": "0.1.1",
   "description": "freshmade stylesheets for the whole family.",
-  "main": "./bin/index.js",
+  "main": "./index.js",
   "bin": {
-    "sheetloaf": "./bin/sheetloaf"
+    "sheetloaf": "./index.js"
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"styles/**/*.scss\" \"dist/\" --style compressed"
+    "test2": "node . \"test/samples/styles/**/*.scss\" \"test/samples/render/\" --style compressed"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benjrichardson/sheetloaf.git"
+    "url": "git+https://github.com/cheddarbread/sheetloaf.git"
   },
+  "files": [
+    "index.js",
+    "parser.js"
+  ],
   "keywords": [
     "scss",
     "css",
@@ -23,9 +27,9 @@
   "author": "Benjamin Richardson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/benjrichardson/sheetloaf/issues"
+    "url": "https://github.com/cheddarbread/sheetloaf/issues"
   },
-  "homepage": "https://github.com/benjrichardson/sheetloaf#readme",
+  "homepage": "https://github.com/cheddarbread/sheetloaf#readme",
   "dependencies": {
     "chokidar": "^3.4.0",
     "commander": "^6.0.0",
