@@ -17,7 +17,7 @@ program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 // Angled brackets denote required argument, square denote optional
 program
     .arguments('<source> <out>') // can change source to []
-    .description('Compile Sass to CSS and transform the output using PostCSS all in one command. 🧆')
+    .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source, out) => {
         input = source;
         output = out;
@@ -25,10 +25,22 @@ program
 program
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
-    .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.');
+    .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
+    .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 program.parse(process.argv);
 
-let plugins = parser.getPostCSSConfig(program.config);
+let postcssConfig = {
+    plugins: []
+};
+if (program.use !== undefined) {
+    // If user specifies --use, ignore postcss config files.
+    program.use.split(',').forEach(function (plugin) {
+        console.log(plugin);
+        postcssConfig.plugins.push(require(plugin));
+    });
+} else {
+    postcssConfig = parser.getPostCSSConfig(program.config);
+}
 
 parser.parseInput(input, function (entries) {
     console.log(`Entries: ${entries}`);
@@ -61,7 +73,7 @@ function renderSheet(filename) {
         outputStyle: program.style
     }, function (err, result) {
         if (err === null) {
-            postcss(plugins).process(result.css.toString(), {
+            postcss(postcssConfig.plugins).process(result.css.toString(), {
                 from: result.stats.entry,
                 to: destination,
                 map: true

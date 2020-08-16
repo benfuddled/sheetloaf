@@ -1,15 +1,14 @@
 # 🍖 Sheetloaf
 
-WARNING: This project is still early on and does not do much of anything. Check back later. 
+Compile Sass to CSS and transform using PostCSS, all in one command.
 
-* No additional dependencies except for those required by sass and postcss
-* More to come...
+WARNING: This project is still early on and does not do much of anything. Check back later. 
 
 ## FAQ
 
 > Can I use this with regular CSS files?
 
-Yes, but you should use PostCSS-CLI in that case. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
+Yes, but you should use PostCSS-CLI in that case, as you'll likely incur a performance hit. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
 Likewise, if all you're looking for is to compile Sass with no transformations, stick with Dart Sass.
 
@@ -29,5 +28,5 @@ Sass Options:
 
 PostCSS-CLI Options:
   --config <LOCATION>  Set a custom directory to look for a postcss config file.
-  -u, --use            List of postcss plugins to use (not functional)         [array]
+  -u, --use <PLUGIN>   List of postcss plugins to use (will make sheetloaf ignore any config files).
 ```
