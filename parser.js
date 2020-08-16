@@ -57,7 +57,9 @@ function getPostCSSConfig(loc) {
         fs.lstatSync(configLoc);
         return require(configLoc);
     } catch (err) {
-        return [];
+        return {
+            plugins: []
+        };
     }
 }
 

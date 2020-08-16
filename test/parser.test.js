@@ -82,8 +82,8 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
         it('Should get PostCSS config file contents.', () => {
             assert.deepEqual(parser.getPostCSSConfig('test/samples'), { plugins: [require('autoprefixer')] });
         });
-        it('Should return an empty array if no PostCSS config file is found.', () => {
-            assert.deepEqual(parser.getPostCSSConfig('wrong/directory/'), []);
+        it('Should return an object of empty arrays if no PostCSS config file is found.', () => {
+            assert.deepEqual(parser.getPostCSSConfig('wrong/directory/'), { plugins: [] });
         });
     });
 });

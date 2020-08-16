@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//todo semver and stdin
+//todo sourcemaps and semver and stdin
 const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
@@ -36,7 +36,6 @@ let postcssConfig = {
 if (program.use !== undefined) {
     // If user specifies --use, ignore postcss config files.
     program.use.split(',').forEach(function (plugin) {
-        console.log(plugin);
         postcssConfig.plugins.push(require(plugin));
     });
 } else {
