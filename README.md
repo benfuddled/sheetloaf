@@ -1,8 +1,6 @@
-Fresh-made stylesheets for the whole family. 🍖 
+🍖 Fresh-made stylesheets for the whole family. Compile sass files to CSS and transform using postcss, all in one command.
 
-Compile sass files to CSS and transform using postcss, all in one command.
-
-WARNING: This project is still early on and may be buggy. 
+WARNING: This project is still early on. Expect bugs and missing features. 
 
 ## Usage
 
@@ -19,13 +17,12 @@ Options:
 
 Sass Options:
   -s, --style <NAME>   Output style. ["expanded", "compressed"] (default: "expanded")
+  --[no-]source-map    Whether to generate source maps. (defaults to on)
 
 PostCSS-CLI Options:
   --config <LOCATION>  Set a custom directory to look for a postcss config file.
   -u, --use <PLUGIN>   List of postcss plugins to use (will make sheetloaf ignore any config files).
 ```
-
-Custom parsers/stringifiers are not currently supported. 
 
 ## Examples
 
@@ -59,12 +56,18 @@ sheetloaf ./scss/ ./css/ --style compressed --use autoprefixer
 
 ## FAQ
 
-> Can I use this with regular CSS files?
+### Can I use this with regular CSS files?
 
 Yes, but you should use [postcss-cli](https://github.com/postcss/postcss-cli) in that case, as you'll be incurring a performance hit for no good reason. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
 Likewise, if all you're looking for is to compile Sass with no transformations, you can stick with [dart-sass](https://github.com/sass/dart-sass).
 
-> Do all postcss plugins work?
+### Do all postcss plugins work?
 
 Yes, they should. However custom stringifiers/parsers are not currently supported.
+
+### What's the benefit of using this over something like Gulp, Webpack, or Parcel?
+
+For complex projects a more full-featured tool may be more useful, or if you prefer prefer processing all of your scripts/styles/etc in one place. 
+
+The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used this tool for all of my personal web projects, and figured I'd polish it up and see if it helps anyone else.

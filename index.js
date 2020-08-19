@@ -25,10 +25,12 @@ program
     });
 program
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
+    .option('--no-source-map', 'Whether to generate source maps.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 program.parse(process.argv);
+
 
 let postcssConfig = {
     plugins: []
@@ -65,8 +67,8 @@ function renderSheet(filename) {
 
     sass.render({
         file: filename,
-        sourceMap: true,
-        sourceMapEmbed: true,
+        sourceMap: program.sourceMap,
+        sourceMapEmbed: program.sourceMap,
         outFile: destination,
         outputStyle: program.style
     }, function (err, result) {
@@ -74,7 +76,7 @@ function renderSheet(filename) {
             postcss(postcssConfig.plugins).process(result.css.toString(), {
                 from: result.stats.entry,
                 to: destination,
-                map: true
+                map: program.sourceMap
             }).then(postedResult => {
                 try {
                     fs.mkdirSync(path.dirname(destination), { recursive: true });

@@ -1,6 +1,6 @@
 {
   "name": "sheetloaf",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "freshmade stylesheets for the whole family.",
   "main": "./index.js",
   "bin": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"test/samples/styles/**/*.scss\" \"test/samples/render/\" --style compressed"
+    "test2": "node . \"test/samples/styles/**/*.scss\" \"test/samples/render/\" --style compressed --no-source-map"
   },
   "repository": {
     "type": "git",
