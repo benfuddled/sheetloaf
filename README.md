@@ -71,3 +71,13 @@ Yes, they should. However custom stringifiers/parsers are not currently supporte
 For complex projects a more full-featured tool may be more useful, or if you prefer prefer processing all of your scripts/styles/etc in one place. 
 
 The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used this tool for all of my personal web projects, and figured I'd polish it up and see if it helps anyone else.
+
+## Known Issues/Feature Requests
+
+Many of these are already implemented in dart-sass/postcss, and the plan, like most other options, is to make them work as similarly to those tools as possible.
+
+* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
+
+* Allow piping content from stdin to be rendered.
+
+* When an error occurs, emit a stylesheet describing it. 
