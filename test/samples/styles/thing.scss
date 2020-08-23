@@ -1,5 +1,8 @@
 body {
     background: green;
+    display: flex; 
+    display: grid;
+    backdrop-filter: blur(10px);
     div {
         color: red;
     }
