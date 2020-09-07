@@ -12,19 +12,22 @@ const postcss = require('postcss');
 const chokidar = require('chokidar');
 const program = new Command();
 
-
-let input, output;
+console.log(process.argv);
 
 program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
+
 // Angled brackets denote required argument, square denote optional
 program
-    .arguments('<source> <out>') // can change source to []
+    .arguments('<sources...>') // can change source to []
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
-    .action((source, out) => {
-        input = source;
-        output = out;
+    .action((source) => {
+        //console.log(source[0].split(','));
+        parser.expandGlob(source[0].split(','), 0, function(expanded) {
+            parseInput(expanded);
+        });
     });
 program
+    .option('-o, --output <LOCATION>', 'Accepts an individual filename, directories, or globs. If this option is not included, file contents will be written to stdout.')
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--no-source-map', 'Whether to generate source maps.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
@@ -32,7 +35,11 @@ program
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 program.parse(process.argv);
 
+function parseInput(expanded) {
+    //console.log(expanded);
+}
 
+/*
 let postcssConfig = {
     plugins: []
 };
@@ -77,16 +84,16 @@ if (program.watch) {
 }
 function renderSheet(filename) {
     console.log(`Rendering ${filename}...`)
-    let destination = parser.parseDestination(filename, input, output);
+    let destination = parser.parseDestination(filename, input, program.output);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
-    /*let result = sass.renderSync({
-        file: filename,
-        sourceMap: true,
-        sourceMapEmbed: true,
-        outFile: destination,
-        outputStyle: program.style
-    });*/
+    // let result = sass.renderSync({
+    //     file: filename,
+    //     sourceMap: true,
+    //     sourceMapEmbed: true,
+    //     outFile: destination,
+    //     outputStyle: program.style
+    // });
 
     sass.render({
         file: filename,
@@ -121,4 +128,4 @@ function renderSheet(filename) {
             console.log(err.formatted);
         }
     });
-}
+}*/

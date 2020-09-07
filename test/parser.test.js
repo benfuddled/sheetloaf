@@ -5,7 +5,7 @@ const parser = require('../parser');
 
 describe('When CLI Arguments Need Further Parsing Test', () => {
     describe('parser.parseDestination() Test', () => {
-        it('Should return correct output as string when single file is used', () => {
+        it('Should return correct output as string when input is a single file', () => {
             let filename = 'test/samples/styles/sub/baz.scss';
             let source = 'test/samples/styles/sub/baz.scss';
             let out = 'test/dist/baz.css';
@@ -87,3 +87,9 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
         });
     });
 });
+
+
+// parsedestination: should throw an error when input glob is used to output a single file
+// check if unqouted globs work (in and out)
+// check if filename arrays work
+// check if stdout works if --option is not provided

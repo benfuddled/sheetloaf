@@ -6,9 +6,9 @@ WARNING: This project is still early on and should be considered alpha quality. 
 
 ```
 Usage:
-  sheetloaf [input.scss] [output.css] [OPTIONS]
-  sheetloaf <input-directory> <output-directory> [OPTIONS]
-  sheetloaf <input-glob-pattern> <output-directory> [OPTIONS] 
+  sheetloaf [input.scss...] [output.css] [OPTIONS]
+  sheetloaf <input-directory...> <output-directory> [OPTIONS]
+  sheetloaf <input-glob-pattern...> <output-directory> [OPTIONS] 
 
 Options:
   -v, --version        Print the version of Sheetloaf.
@@ -43,8 +43,10 @@ npm install autoprefixer
 You may also specify a glob pattern like so:
 
 ```
-sheetloaf ./scss/**/*.scss ./css --style compressed --use autoprefixer
+sheetloaf "./scss/**/*.scss" "./css" --style compressed --use autoprefixer
 ```
+
+For best results when using a glob pattern, make sure to use quotes to avoid side-issues. See https://medium.com/@jakubsynowiec/you-should-always-quote-your-globs-in-npm-scripts-621887a2a784
 
 ---
 
@@ -78,6 +80,9 @@ Many of these are already implemented in dart-sass/postcss, and the plan, like m
 
 * Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
 
-* Allow piping content from stdin to be rendered.
+* Allow piping content from stdin.
 
 * When an error occurs, emit a stylesheet describing it. 
+
+
+if no -o arg is provided, this will write to stdout
