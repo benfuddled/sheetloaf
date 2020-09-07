@@ -3,51 +3,45 @@ const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
 
-function expandGlob(input, index = 0, callback) {
+function expandGlob(input, callback, index = 0, expanded = []) {
 
-    let arrHousing = [];
+    if (index < input.length) {
+        console.log(index);
+        if (!picomatch.scan(input[index]).isGlob && fs.lstatSync(path.resolve(process.cwd(), input[index])).isDirectory()) {
 
-    for (i = 0; i < input.length; i++) {
-
-        if (!picomatch.scan(input[i]).isGlob && fs.lstatSync(path.resolve(process.cwd(), input[i])).isDirectory()) {
-
-            let dir = input[i];
+            let dir = input[index];
 
             fs.readdir(dir, (err, files) => {
                 if (err) {
                     throw err;
                 } else {
-                    let filesInDir = [];
                     files.forEach(file => {
 
                         let fullname = path.resolve(process.cwd(), dir, file);
                         if (!fs.lstatSync(fullname).isDirectory()) {
-                            filesInDir.push(fullname);
+                            expanded.push(fullname);
                         }
                     });
-                    arrHousing.push(...filesInDir);
+
+                    index = index + 1;
+                    expandGlob(input, callback, index, expanded);
                 }
             });
         } else {
-            let expandedGlob = fg.sync(input[i], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
-            arrHousing.push(...expandedGlob);
-        }
-        /*if (i = 1) {
-            input.splice(1, 1, 'hurrrrr');
-        }*/
-    }
+            let files = fg.sync(input[index], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
+            expanded.push(...files);
 
-    console.log(arrHousing);
-    console.log('00000000000000000000000000000000000000');
-    setTimeout(function() {
-        console.log(arrHousing);
-        callback(input);
-    }, 6000);
-    /*setTimeout(function() {
-        callback(input);
-    }, 1000);*/
+            index = index + 1;
+            expandGlob(input, callback, index, expanded);
+        }
+    } else {
+        callback(expanded);
+    }
 }
 
+
+
+// These will most likely be done away with
 async function parseInput(input, callback) {
     
     if (!picomatch.scan(input).isGlob && fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
@@ -69,7 +63,7 @@ async function parseInput(input, callback) {
         callback(entries);
     }
 }
-
+// This too
 function parseDestination(filename, source, dest) {
     if (picomatch.scan(source).isGlob || fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
         console.log(1);

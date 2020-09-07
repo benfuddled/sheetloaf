@@ -22,8 +22,12 @@ program
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source) => {
         //console.log(source[0].split(','));
-        parser.expandGlob(source[0].split(','), 0, function(expanded) {
-            parseInput(expanded);
+        parser.expandGlob(source[0].split(','), function(entries) {
+            entries.forEach(function (filename) {
+                if (path.basename(filename).charAt(0) !== '_') {
+                    renderSheet(filename);
+                }
+            });
         });
     });
 program
@@ -35,11 +39,7 @@ program
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 program.parse(process.argv);
 
-function parseInput(expanded) {
-    //console.log(expanded);
-}
 
-/*
 let postcssConfig = {
     plugins: []
 };
@@ -51,14 +51,6 @@ if (program.use !== undefined) {
 } else {
     postcssConfig = parser.getPostCSSConfig(program.config);
 }
-
-parser.parseInput(input, function (entries) {
-    entries.forEach(function (filename) {
-        if (path.basename(filename).charAt(0) !== '_') {
-            renderSheet(filename);
-        }
-    });
-});
 
 if (program.watch) {
 
@@ -128,4 +120,4 @@ function renderSheet(filename) {
             console.log(err.formatted);
         }
     });
-}*/
+}
