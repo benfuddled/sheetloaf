@@ -22,15 +22,15 @@ function expandGlob(input, callback, index = 0, expanded = []) {
 
         if (isGlob === false) {
             try {
-                isDir = fs.lstatSync(path.resolve(process.cwd(), input[index])).isDirectory();
-                isFile = fs.lstatSync(path.resolve(process.cwd(), input[index])).isFile();
+                isDir = fs.lstatSync(path.normalize( input[index])).isDirectory();
+                isFile = fs.lstatSync(path.normalize( input[index])).isFile();
             } catch (err) {
                 throw (err);
             }
         }
 
         if (isGlob || isFile) {
-            let files = fg.sync(input[index], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
+            let files = fg.sync(input[index], { dot: true }).map(entry => path.normalize(entry));
             expanded.push(...files);
 
             index = index + 1;
@@ -44,7 +44,7 @@ function expandGlob(input, callback, index = 0, expanded = []) {
                 } else {
                     files.forEach(file => {
 
-                        let fullname = path.resolve(process.cwd(), dir, file);
+                        let fullname = path.join(dir, file);
                         if (!fs.lstatSync(fullname).isDirectory()) {
                             expanded.push(fullname);
                         }
@@ -56,12 +56,29 @@ function expandGlob(input, callback, index = 0, expanded = []) {
             });
         }
 
+
     } else {
         callback(expanded);
     }
 }
 
+/**
+ * 
+ * @param {*} filename 
+ * @param {*} output 
+ * @param {*} base 
+ */
+function parseDest(filename, output, base = '', extension = '.css') {
+    if (path.extname(output) === '') {
+        let mirror = (base !== '' ? path.dirname(filename.replace(path.join(base, '/'), '')) : '');
+        return path.join(output, mirror, path.basename(filename, path.extname(filename)) + extension);
+    } else {
+        return output;
+    }
+}
+
 exports.expandGlob = expandGlob;
+exports.parseDest = parseDest;
 
 
 /*

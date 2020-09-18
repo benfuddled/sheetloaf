@@ -24,6 +24,8 @@ PostCSS-CLI Options:
   -u, --use <PLUGIN>   List of postcss plugins to use (will make sheetloaf ignore any config files).
 ```
 
+Sheetloaf will ignore partial files whose names begin with _.
+
 ## Examples
 
 ```

@@ -26,13 +26,15 @@ program
             console.log(source[0].split(','));
             entries.forEach(function (filename) {
                 if (path.basename(filename).charAt(0) !== '_') {
-                    //renderSheet(filename);
+                    renderSheet(filename);
                 }
             });
         });
     });
 program
-    .option('-o, --output <LOCATION>', 'Accepts an individual filename, directories, or globs. If this option is not included, file contents will be written to stdout.')
+    .option('-o, --output <LOCATION>', 'Accepts an individual filename, or directory. If this option is not included, file contents will be written to stdout.')
+    .option('-b, --base <DIR>', 'Mirror the directory structure relative to this path in the output directory.', '')
+    .option('--ext <EXTENSION>', 'Override the output file extension. Use when --output is a directory.', '.css')
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--no-source-map', 'Whether to generate source maps.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
@@ -52,32 +54,14 @@ if (program.use !== undefined) {
 } else {
     postcssConfig = parser.getPostCSSConfig(program.config);
 }
-/*
-if (program.watch) {
 
-    chokidar.watch(input, {
-        usePolling: true,
-        interval: 500,
-        awaitWriteFinish: {
-            stabilityThreshold: 1500,
-            pollInterval: 100
-        }
-    }).on('change', (changed) => {
-        console.log(`File changed: ${changed}`);
-
-        parser.parseInput(input, function (entries) {
-            entries.forEach(function (filename) {
-                if (path.basename(filename).charAt(0) !== '_') {
-                    renderSheet(filename);
-                }
-            });
-        });
-    });
-
-}
 function renderSheet(filename) {
-    console.log(`Rendering ${filename}...`)
-    let destination = parser.parseDestination(filename, input, program.output);
+    console.log(`Rendering ${filename}...`);
+
+    // only if output is not single file, may need to make parser handle this complexity
+    let destination = parser.parseDest(filename, program.output, program.base, program.ext);
+
+    //console.log(`Wrote to ${destination}`);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
     // let result = sass.renderSync({
@@ -121,4 +105,32 @@ function renderSheet(filename) {
             console.log(err.formatted);
         }
     });
+}
+
+
+
+
+
+/*
+if (program.watch) {
+
+    chokidar.watch(input, {
+        usePolling: true,
+        interval: 500,
+        awaitWriteFinish: {
+            stabilityThreshold: 1500,
+            pollInterval: 100
+        }
+    }).on('change', (changed) => {
+        console.log(`File changed: ${changed}`);
+
+        parser.parseInput(input, function (entries) {
+            entries.forEach(function (filename) {
+                if (path.basename(filename).charAt(0) !== '_') {
+                    renderSheet(filename);
+                }
+            });
+        });
+    });
+
 }*/

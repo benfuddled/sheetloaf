@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"test/samples/styles/**/*.scss\" --output \"test/samples/render/\" --style compressed --no-source-map --use autoprefixer"
+    "test2": "node . \"test/samples/styles/**/*.scss\" --output \"test/samples/render/\" --style compressed --base test/samples/styles/ --no-source-map --use autoprefixer"
   },
   "repository": {
     "type": "git",
