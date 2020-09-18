@@ -3,12 +3,39 @@ const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
 
+/**
+ * Given an array of input sources, expand any globs and validate that inputs exist.
+ * 
+ * @param {*} input 
+ * @param {*} callback 
+ * @param {*} index 
+ * @param {*} expanded 
+ */
 function expandGlob(input, callback, index = 0, expanded = []) {
 
     if (index < input.length) {
-        console.log(index);
-        if (!picomatch.scan(input[index]).isGlob && fs.lstatSync(path.resolve(process.cwd(), input[index])).isDirectory()) {
+        let isGlob = false;
+        let isDir = false;
+        let isFile = false;
 
+        isGlob = picomatch.scan(input[index]).isGlob;
+
+        if (isGlob === false) {
+            try {
+                isDir = fs.lstatSync(path.resolve(process.cwd(), input[index])).isDirectory();
+                isFile = fs.lstatSync(path.resolve(process.cwd(), input[index])).isFile();
+            } catch (err) {
+                throw (err);
+            }
+        }
+
+        if (isGlob || isFile) {
+            let files = fg.sync(input[index], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
+            expanded.push(...files);
+
+            index = index + 1;
+            expandGlob(input, callback, index, expanded);
+        } else if (isDir) {
             let dir = input[index];
 
             fs.readdir(dir, (err, files) => {
@@ -27,20 +54,17 @@ function expandGlob(input, callback, index = 0, expanded = []) {
                     expandGlob(input, callback, index, expanded);
                 }
             });
-        } else {
-            let files = fg.sync(input[index], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
-            expanded.push(...files);
-
-            index = index + 1;
-            expandGlob(input, callback, index, expanded);
         }
+
     } else {
         callback(expanded);
     }
 }
 
+exports.expandGlob = expandGlob;
 
 
+/*
 // These will most likely be done away with
 async function parseInput(input, callback) {
     
@@ -106,4 +130,4 @@ function getPostCSSConfig(loc) {
 exports.expandGlob = expandGlob;
 exports.parseInput = parseInput;
 exports.parseDestination = parseDestination;
-exports.getPostCSSConfig = getPostCSSConfig;
+exports.getPostCSSConfig = getPostCSSConfig;*/

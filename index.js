@@ -23,9 +23,10 @@ program
     .action((source) => {
         //console.log(source[0].split(','));
         parser.expandGlob(source[0].split(','), function(entries) {
+            console.log(source[0].split(','));
             entries.forEach(function (filename) {
                 if (path.basename(filename).charAt(0) !== '_') {
-                    renderSheet(filename);
+                    //renderSheet(filename);
                 }
             });
         });
@@ -51,7 +52,7 @@ if (program.use !== undefined) {
 } else {
     postcssConfig = parser.getPostCSSConfig(program.config);
 }
-
+/*
 if (program.watch) {
 
     chokidar.watch(input, {
@@ -120,4 +121,4 @@ function renderSheet(filename) {
             console.log(err.formatted);
         }
     });
-}
+}*/
