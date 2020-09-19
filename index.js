@@ -3,16 +3,12 @@
 const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
-const fg = require('fast-glob');
-const picomatch = require('picomatch');
 const version = require('./package.json').version;
 const parser = require('./parser');
 const { Command } = require('commander');
 const postcss = require('postcss');
 const chokidar = require('chokidar');
 const program = new Command();
-
-console.log(process.argv);
 
 program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 
@@ -21,7 +17,6 @@ program
     .arguments('<sources...>') // can change source to []
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source) => {
-        //console.log(source[0].split(','));
         parser.expandGlob(source[0].split(','), function(entries) {
             console.log(source[0].split(','));
             entries.forEach(function (filename) {
@@ -58,10 +53,7 @@ if (program.use !== undefined) {
 function renderSheet(filename) {
     console.log(`Rendering ${filename}...`);
 
-    // only if output is not single file, may need to make parser handle this complexity
     let destination = parser.parseDest(filename, program.output, program.base, program.ext);
-
-    //console.log(`Wrote to ${destination}`);
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
     // let result = sass.renderSync({
