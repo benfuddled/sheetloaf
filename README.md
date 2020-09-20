@@ -14,7 +14,7 @@ Usage:
 Basic options:
   -o, --output   Output file                                            [string]
   -d, --dir      Output directory                                       [string]
-  -w, --watch    Watch files for changes and recompile as needed       [boolean] // todo
+  -w, --watch    Watch files for changes and recompile as needed       [boolean] 
   --verbose      Be verbose                                            [boolean] // todo
   --env          A shortcut for setting NODE_ENV                        [string] // todo
 
@@ -46,35 +46,16 @@ Misc:
 
 If this option is not included, file contents will be written to stdout.
 
-// old
-
-```
-Usage:
-  sheetloaf [input.scss...] [output.css] [OPTIONS]
-  sheetloaf <input-directory...> <output-directory> [OPTIONS]
-  sheetloaf <input-glob-pattern...> <output-directory> [OPTIONS] 
-
-Options:
-  -v, --version        Print the version of Sheetloaf.
-  -w, --watch          Watch stylesheets and recompile when they change.
-  -h, --help           display help for command
-
-PostCSS-CLI Options:
-  --config <LOCATION>  Set a custom directory to look for a postcss config file.
-  -u, --use <PLUGIN>   List of postcss plugins to use (will make sheetloaf ignore any config files).
-```
-
-Sheetloaf will ignore partial files whose names begin with _.
-
 ## Examples
 
 ```
-sheetloaf ./scss/style.scss ./css/style.css --style compressed --use autoprefixer
+sheetloaf scss/style.scss --output css/style.css --style compressed --use autoprefixer
 ```
 
 Above is an example of transforming a sass file, compressing the output and using the 
-postcss plugin autoprefixer to add vendor prefixes. Note that postcss plugins will need
-to be installed separately, so to use autoprefixer you'd run:
+postcss plugin autoprefixer to add vendor prefixes. Sheetloaf will automatically ignore 
+partial files whose names begin with _. Note that postcss plugins will need to be installed
+separately, so to use autoprefixer you'd run:
 
 ```
 npm install autoprefixer
@@ -85,17 +66,20 @@ npm install autoprefixer
 You may also specify a glob pattern like so:
 
 ```
-sheetloaf "./scss/**/*.scss" "./css" --style compressed --use autoprefixer
+sheetloaf "scss/**/*.scss" --dir css --style compressed --use autoprefixer
+sheetloaf scss --dir css --style compressed --use autoprefixer
 ```
+
+In this case we're using the --dir option in place of output.
 
 For best results when using a glob pattern, make sure to use quotes to avoid side-issues. See https://medium.com/@jakubsynowiec/you-should-always-quote-your-globs-in-npm-scripts-621887a2a784
 
----
 
-Or a directory (note that this is not recursive):
+Sheetloaf also allows for piping! Just omit the --dir/--output option:
 
 ```
-sheetloaf ./scss/ ./css/ --style compressed --use autoprefixer
+sheetloaf scss/style.scss --use autoprefixer > output.css
+sheetloaf scss/style.scss --use autoprefixer 2> error.txt 1> ~/output.css 
 ```
 
 ## FAQ
@@ -118,13 +102,10 @@ The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used t
 
 ## Known Issues/Feature Requests
 
-Many of these are already implemented in dart-sass/postcss, and the plan, like most other options, is to make them work as similarly to those tools as possible.
+Many of these are already implemented in dart-sass/postcss, and the plan is to make them work as similarly to those tools as possible.
 
 * Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
 
 * Allow piping content from stdin.
 
 * When an error occurs, emit a stylesheet describing it. 
-
-
-if no -o arg is provided, this will write to stdout
