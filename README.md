@@ -44,8 +44,6 @@ Misc:
 
 ```
 
-If this option is not included, file contents will be written to stdout.
-
 ## Examples
 
 ```
@@ -79,7 +77,7 @@ Sheetloaf also allows for piping! Just omit the --dir/--output option:
 
 ```
 sheetloaf scss/style.scss --use autoprefixer > output.css
-sheetloaf scss/style.scss --use autoprefixer 2> error.txt 1> ~/output.css 
+sheetloaf scss/style.scss --use autoprefixer 2> error.txt 1> output.css 
 ```
 
 ## FAQ
