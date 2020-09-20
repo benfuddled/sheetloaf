@@ -77,8 +77,27 @@ function parseDest(filename, output, base = '', extension = '.css') {
     }
 }
 
+function getPostCSSConfig(loc) {
+    let configLoc;
+    if (loc != undefined) {
+        configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
+    } else {
+        configLoc = path.resolve(process.cwd(), 'postcss.config.js');
+    }
+
+    try {
+        fs.lstatSync(configLoc);
+        return require(configLoc);
+    } catch (err) {
+        return {
+            plugins: []
+        };
+    }
+}
+
 exports.expandGlob = expandGlob;
 exports.parseDest = parseDest;
+exports.getPostCSSConfig = getPostCSSConfig;
 
 
 /*
@@ -123,24 +142,6 @@ function parseDestination(filename, source, dest) {
         // Is file
         console.log(2);
         return path.resolve(process.cwd(), dest);
-    }
-}
-
-function getPostCSSConfig(loc) {
-    let configLoc;
-    if (loc != undefined) {
-        configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
-    } else {
-        configLoc = path.resolve(process.cwd(), 'postcss.config.js');
-    }
-
-    try {
-        fs.lstatSync(configLoc);
-        return require(configLoc);
-    } catch (err) {
-        return {
-            plugins: []
-        };
     }
 }
 

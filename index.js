@@ -18,13 +18,44 @@ program
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source) => {
         parser.expandGlob(source[0].split(','), function(entries) {
-            console.log(source[0].split(','));
             entries.forEach(function (filename) {
                 if (path.basename(filename).charAt(0) !== '_') {
                     renderSheet(filename);
                 }
             });
         });
+
+        if (program.watch) {
+            chokidar.watch(source[0].split(','), {
+                usePolling: true,
+                interval: 500,
+                ignoreInitial: true,
+                awaitWriteFinish: {
+                    stabilityThreshold: 1500,
+                    pollInterval: 100
+                }
+            }).on('change', (changed) => {
+                console.log(`File changed: ${changed}`);
+        
+                parser.expandGlob(source[0].split(','), function(entries) {
+                    entries.forEach(function (filename) {
+                        if (path.basename(filename).charAt(0) !== '_') {
+                            renderSheet(filename);
+                        }
+                    });
+                });
+            }).on('add', (added) => {
+                console.log(`File added: ${added}`);
+        
+                parser.expandGlob(source[0].split(','), function(entries) {
+                    entries.forEach(function (filename) {
+                        if (path.basename(filename).charAt(0) !== '_') {
+                            renderSheet(filename);
+                        }
+                    });
+                });
+            });
+        }
     });
 program
     .option('-o, --output <LOCATION>', 'Output file.')
@@ -52,15 +83,16 @@ if (program.use !== undefined) {
 }
 
 function renderSheet(filename) {
-    console.log(`Rendering ${filename}...`);
 
     let destination;
     if (program.dir) {
+        console.log(`Rendering ${filename}...`);
         destination = parser.parseDest(filename, program.dir, program.base, program.ext);
     } else if (program.output) {
+        console.log(`Rendering ${filename}...`);
         destination = parser.parseDest(filename, program.output);
     } else {
-        console.log('todo behavior for stdout');
+        destination = '';
     }
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
@@ -85,52 +117,36 @@ function renderSheet(filename) {
                 to: destination,
                 map: program.sourceMap
             }).then(postedResult => {
-                try {
-                    fs.mkdirSync(path.dirname(destination), { recursive: true });
-                } catch (err) {
-                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                if (destination !== '') {
+                    try {
+                        fs.mkdirSync(path.dirname(destination), { recursive: true });
+                    } catch (err) {
+                        if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                    }
+    
+                    fs.writeFile(destination, postedResult.css, (err) => {
+                        // throws an error, you could also catch it here
+                        if (err) throw err;
+    
+                        // success case, the file was saved
+                        console.log(`Successfully written to ${destination}`);
+                    })
+                } else {
+                    process.stdout.write(postedResult.css);
                 }
-
-                fs.writeFile(destination, postedResult.css, (err) => {
-                    // throws an error, you could also catch it here
-                    if (err) throw err;
-
-                    // success case, the file was saved
-                    console.log(`Successfully written to ${destination}`);
-                })
             }).catch(err => {
-                console.log(err);
+                if (destination !== '') {
+                    console.log(err);
+                } else {
+                    process.stderr.write(err);
+                }
             })
         } else {
-            console.log(err.formatted);
+            if (destination !== '') {
+                console.log(err.formatted);
+            } else {
+                process.stderr.write(err.formatted);
+            }
         }
     });
 }
-
-
-
-
-
-/*
-if (program.watch) {
-
-    chokidar.watch(input, {
-        usePolling: true,
-        interval: 500,
-        awaitWriteFinish: {
-            stabilityThreshold: 1500,
-            pollInterval: 100
-        }
-    }).on('change', (changed) => {
-        console.log(`File changed: ${changed}`);
-
-        parser.parseInput(input, function (entries) {
-            entries.forEach(function (filename) {
-                if (path.basename(filename).charAt(0) !== '_') {
-                    renderSheet(filename);
-                }
-            });
-        });
-    });
-
-}*/

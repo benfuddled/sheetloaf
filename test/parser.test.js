@@ -78,6 +78,15 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
 
     });
 
+    describe('parser.getPostCSSConfig() Test', () => {
+        it('Should get PostCSS config file contents.', () => {
+            assert.deepEqual(parser.getPostCSSConfig('test/samples'), { plugins: [require('autoprefixer')] });
+        });
+        it('Should return an object of empty arrays if no PostCSS config file is found.', () => {
+            assert.deepEqual(parser.getPostCSSConfig('wrong/directory/'), { plugins: [] });
+        });
+    });
+
 
     // describe('parser.parseDestination() Test', () => {
     //     it('Should return correct output as string when input is a single file', () => {
@@ -150,15 +159,6 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
     //                 done(new Error(`Entries ${entries} do not match expected ${expected}.`));
     //             }
     //         });
-    //     });
-    // });
-
-    // describe('parser.getPostCSSConfig() Test', () => {
-    //     it('Should get PostCSS config file contents.', () => {
-    //         assert.deepEqual(parser.getPostCSSConfig('test/samples'), { plugins: [require('autoprefixer')] });
-    //     });
-    //     it('Should return an object of empty arrays if no PostCSS config file is found.', () => {
-    //         assert.deepEqual(parser.getPostCSSConfig('wrong/directory/'), { plugins: [] });
     //     });
     // });
 });
