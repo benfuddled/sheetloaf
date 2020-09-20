@@ -3,45 +3,77 @@ const fs = require('fs');
 const fg = require('fast-glob');
 const picomatch = require('picomatch');
 
-async function parseInput(input, callback) {
-    let entries = [];
-    if (!picomatch.scan(input).isGlob && fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
-        fs.readdir(input, (err, files) => {
-            if (err) {
-                throw err;
-            } else {
-                files.forEach(file => {
-                    let fullname = path.resolve(process.cwd(), input, file);
-                    if (!fs.lstatSync(fullname).isDirectory()) {
-                        entries.push(fullname);
-                    }
-                });
-                callback(entries);
+/**
+ * Given an array of input sources, expand any globs and validate that inputs exist.
+ * 
+ * @param {*} input 
+ * @param {*} callback 
+ * @param {*} index 
+ * @param {*} expanded 
+ */
+function expandGlob(input, callback, index = 0, expanded = []) {
+
+    if (index < input.length) {
+        let isGlob = false;
+        let isDir = false;
+        let isFile = false;
+
+        isGlob = picomatch.scan(input[index]).isGlob;
+
+        if (isGlob === false) {
+            try {
+                isDir = fs.lstatSync(path.normalize( input[index])).isDirectory();
+                isFile = fs.lstatSync(path.normalize( input[index])).isFile();
+            } catch (err) {
+                throw (err);
             }
-        });
+        }
+
+        if (isGlob || isFile) {
+            let files = fg.sync(input[index], { dot: true }).map(entry => path.normalize(entry));
+            expanded.push(...files);
+
+            index = index + 1;
+            expandGlob(input, callback, index, expanded);
+        } else if (isDir) {
+            let dir = input[index];
+
+            fs.readdir(dir, (err, files) => {
+                if (err) {
+                    throw err;
+                } else {
+                    files.forEach(file => {
+
+                        let fullname = path.join(dir, file);
+                        if (!fs.lstatSync(fullname).isDirectory()) {
+                            expanded.push(fullname);
+                        }
+                    });
+
+                    index = index + 1;
+                    expandGlob(input, callback, index, expanded);
+                }
+            });
+        }
+
+
     } else {
-        entries = fg.sync([input], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
-        callback(entries);
+        callback(expanded);
     }
 }
 
-function parseDestination(filename, source, dest) {
-    if (picomatch.scan(source).isGlob || fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
-
-        let dirFromGlob = path.relative(picomatch.scan(source).base, path.dirname(filename));
-
-        let basename;
-        if (picomatch.scan(dest).isGlob) {
-            basename = path.basename(filename, path.extname(filename)) + path.extname(dest);
-        } else {
-            basename = path.basename(filename, path.extname(filename)) + '.css';
-        }
-
-        return path.resolve(process.cwd(), picomatch.scan(dest).base, dirFromGlob, basename);
-
+/**
+ * 
+ * @param {*} filename 
+ * @param {*} output 
+ * @param {*} base 
+ */
+function parseDest(filename, output, base = '', extension = '.css') {
+    if (path.extname(output) === '') {
+        let mirror = (base !== '' ? path.dirname(filename.replace(path.join(base, '/'), '')) : '');
+        return path.join(output, mirror, path.basename(filename, path.extname(filename)) + extension);
     } else {
-        // Is file
-        return path.resolve(process.cwd(), dest);
+        return output;
     }
 }
 
@@ -63,6 +95,57 @@ function getPostCSSConfig(loc) {
     }
 }
 
+exports.expandGlob = expandGlob;
+exports.parseDest = parseDest;
+exports.getPostCSSConfig = getPostCSSConfig;
+
+
+/*
+// These will most likely be done away with
+async function parseInput(input, callback) {
+    
+    if (!picomatch.scan(input).isGlob && fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
+        fs.readdir(input, (err, files) => {
+            if (err) {
+                throw err;
+            } else {
+                files.forEach(file => {
+                    let fullname = path.resolve(process.cwd(), input, file);
+                    if (!fs.lstatSync(fullname).isDirectory()) {
+                        entries.push(fullname);
+                    }
+                });
+                callback(entries);
+            }
+        });
+    } else {
+        entries = fg.sync([input], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
+        callback(entries);
+    }
+}
+// This too
+function parseDestination(filename, source, dest) {
+    if (picomatch.scan(source).isGlob || fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
+        console.log(1);
+        let dirFromGlob = path.relative(picomatch.scan(source).base, path.dirname(filename));
+
+        let basename;
+        if (picomatch.scan(dest).isGlob) {
+            basename = path.basename(filename, path.extname(filename)) + path.extname(dest);
+        } else {
+            basename = path.basename(filename, path.extname(filename)) + '.css';
+        }
+
+        return path.resolve(process.cwd(), picomatch.scan(dest).base, dirFromGlob, basename);
+
+    } else {
+        // Is file
+        console.log(2);
+        return path.resolve(process.cwd(), dest);
+    }
+}
+
+exports.expandGlob = expandGlob;
 exports.parseInput = parseInput;
 exports.parseDestination = parseDestination;
-exports.getPostCSSConfig = getPostCSSConfig;
+exports.getPostCSSConfig = getPostCSSConfig;*/

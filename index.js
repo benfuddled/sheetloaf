@@ -3,8 +3,6 @@
 const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
-const fg = require('fast-glob');
-const picomatch = require('picomatch');
 const version = require('./package.json').version;
 const parser = require('./parser');
 const { Command } = require('commander');
@@ -12,19 +10,58 @@ const postcss = require('postcss');
 const chokidar = require('chokidar');
 const program = new Command();
 
-
-let input, output;
-
 program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
+
 // Angled brackets denote required argument, square denote optional
 program
-    .arguments('<source> <out>') // can change source to []
+    .arguments('<sources...>') // can change source to []
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
-    .action((source, out) => {
-        input = source;
-        output = out;
+    .action((source) => {
+        parser.expandGlob(source[0].split(','), function(entries) {
+            entries.forEach(function (filename) {
+                if (path.basename(filename).charAt(0) !== '_') {
+                    renderSheet(filename);
+                }
+            });
+        });
+
+        if (program.watch) {
+            chokidar.watch(source[0].split(','), {
+                usePolling: true,
+                interval: 500,
+                ignoreInitial: true,
+                awaitWriteFinish: {
+                    stabilityThreshold: 1500,
+                    pollInterval: 100
+                }
+            }).on('change', (changed) => {
+                console.log(`File changed: ${changed}`);
+        
+                parser.expandGlob(source[0].split(','), function(entries) {
+                    entries.forEach(function (filename) {
+                        if (path.basename(filename).charAt(0) !== '_') {
+                            renderSheet(filename);
+                        }
+                    });
+                });
+            }).on('add', (added) => {
+                console.log(`File added: ${added}`);
+        
+                parser.expandGlob(source[0].split(','), function(entries) {
+                    entries.forEach(function (filename) {
+                        if (path.basename(filename).charAt(0) !== '_') {
+                            renderSheet(filename);
+                        }
+                    });
+                });
+            });
+        }
     });
 program
+    .option('-o, --output <LOCATION>', 'Output file.')
+    .option('--dir <LOCATION>', 'Output directory.')
+    .option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
+    .option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--no-source-map', 'Whether to generate source maps.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
@@ -45,48 +82,27 @@ if (program.use !== undefined) {
     postcssConfig = parser.getPostCSSConfig(program.config);
 }
 
-parser.parseInput(input, function (entries) {
-    entries.forEach(function (filename) {
-        if (path.basename(filename).charAt(0) !== '_') {
-            renderSheet(filename);
-        }
-    });
-});
-
-if (program.watch) {
-
-    chokidar.watch(input, {
-        usePolling: true,
-        interval: 500,
-        awaitWriteFinish: {
-            stabilityThreshold: 1500,
-            pollInterval: 100
-        }
-    }).on('change', (changed) => {
-        console.log(`File changed: ${changed}`);
-
-        parser.parseInput(input, function (entries) {
-            entries.forEach(function (filename) {
-                if (path.basename(filename).charAt(0) !== '_') {
-                    renderSheet(filename);
-                }
-            });
-        });
-    });
-
-}
 function renderSheet(filename) {
-    console.log(`Rendering ${filename}...`)
-    let destination = parser.parseDestination(filename, input, output);
+
+    let destination;
+    if (program.dir) {
+        console.log(`Rendering ${filename}...`);
+        destination = parser.parseDest(filename, program.dir, program.base, program.ext);
+    } else if (program.output) {
+        console.log(`Rendering ${filename}...`);
+        destination = parser.parseDest(filename, program.output);
+    } else {
+        destination = '';
+    }
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
-    /*let result = sass.renderSync({
-        file: filename,
-        sourceMap: true,
-        sourceMapEmbed: true,
-        outFile: destination,
-        outputStyle: program.style
-    });*/
+    // let result = sass.renderSync({
+    //     file: filename,
+    //     sourceMap: true,
+    //     sourceMapEmbed: true,
+    //     outFile: destination,
+    //     outputStyle: program.style
+    // });
 
     sass.render({
         file: filename,
@@ -101,24 +117,36 @@ function renderSheet(filename) {
                 to: destination,
                 map: program.sourceMap
             }).then(postedResult => {
-                try {
-                    fs.mkdirSync(path.dirname(destination), { recursive: true });
-                } catch (err) {
-                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                if (destination !== '') {
+                    try {
+                        fs.mkdirSync(path.dirname(destination), { recursive: true });
+                    } catch (err) {
+                        if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                    }
+    
+                    fs.writeFile(destination, postedResult.css, (err) => {
+                        // throws an error, you could also catch it here
+                        if (err) throw err;
+    
+                        // success case, the file was saved
+                        console.log(`Successfully written to ${destination}`);
+                    })
+                } else {
+                    process.stdout.write(postedResult.css);
                 }
-
-                fs.writeFile(destination, postedResult.css, (err) => {
-                    // throws an error, you could also catch it here
-                    if (err) throw err;
-
-                    // success case, the file was saved
-                    console.log(`Successfully written to ${destination}`);
-                })
             }).catch(err => {
-                console.log(err);
+                if (destination !== '') {
+                    console.log(err);
+                } else {
+                    process.stderr.write(err);
+                }
             })
         } else {
-            console.log(err.formatted);
+            if (destination !== '') {
+                console.log(err.formatted);
+            } else {
+                process.stderr.write(err.formatted);
+            }
         }
     });
 }
