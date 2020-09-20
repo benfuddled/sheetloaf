@@ -6,6 +6,50 @@ WARNING: This project is still early on and should be considered alpha quality. 
 
 ```
 Usage:
+  sheetloaf [input.css] [OPTIONS] [-o|--output output.css] [--watch|-w]
+  sheetloaf <input.css>... [OPTIONS] --dir <output-directory> [--watch|-w]
+  sheetloaf <input-directory> [OPTIONS] --dir <output-directory> [--watch|-w]
+  sheetloaf <input-glob-pattern> [OPTIONS] --dir <output-directory> [--watch|-w]
+
+Basic options:
+  -o, --output   Output file                                            [string]
+  -d, --dir      Output directory                                       [string]
+  -w, --watch    Watch files for changes and recompile as needed       [boolean] // todo
+  --verbose      Be verbose                                            [boolean] // todo
+  --env          A shortcut for setting NODE_ENV                        [string] // todo
+
+Sass options:
+  -s, --style        Output style. Possible values are "expanded",      [string]
+                     or "compressed". Default: "expanded".
+  --[no-]source-map  Whether to generate source maps. Default is on.   [boolean]
+
+Options for use without a postcss config file:
+  -u, --use      List of postcss plugins to use                          [array]
+  --parser       Custom postcss parser                                  [string] // todo
+  --stringifier  Custom postcss stringifier                             [string] // todo
+  --syntax       Custom postcss syntax                                  [string] // todo
+
+Options for use with --dir:
+  --ext   Override the output file extension; for use with --dir        [string]
+  --base  Mirror the directory structure relative to this path          [string]
+          in the output directory, for use with --dir     
+
+Advanced options:
+  --poll    Use polling for file watching.                             [boolean] // todo
+  --config  Set a custom directory to look for a config file            [string]
+
+Misc:
+  -v, --version  Show version number                                   [boolean]
+  -h, --help     Show help                                             [boolean]
+
+```
+
+If this option is not included, file contents will be written to stdout.
+
+// old
+
+```
+Usage:
   sheetloaf [input.scss...] [output.css] [OPTIONS]
   sheetloaf <input-directory...> <output-directory> [OPTIONS]
   sheetloaf <input-glob-pattern...> <output-directory> [OPTIONS] 
@@ -14,10 +58,6 @@ Options:
   -v, --version        Print the version of Sheetloaf.
   -w, --watch          Watch stylesheets and recompile when they change.
   -h, --help           display help for command
-
-Sass Options:
-  -s, --style <NAME>   Output style. ["expanded", "compressed"] (default: "expanded")
-  --[no-]source-map    Whether to generate source maps. (defaults to on)
 
 PostCSS-CLI Options:
   --config <LOCATION>  Set a custom directory to look for a postcss config file.

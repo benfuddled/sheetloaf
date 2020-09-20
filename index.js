@@ -27,9 +27,10 @@ program
         });
     });
 program
-    .option('-o, --output <LOCATION>', 'Accepts an individual filename, or directory. If this option is not included, file contents will be written to stdout.')
-    .option('-b, --base <DIR>', 'Mirror the directory structure relative to this path in the output directory.', '')
-    .option('--ext <EXTENSION>', 'Override the output file extension. Use when --output is a directory.', '.css')
+    .option('-o, --output <LOCATION>', 'Output file.')
+    .option('--dir <LOCATION>', 'Output directory.')
+    .option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
+    .option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--no-source-map', 'Whether to generate source maps.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
@@ -53,7 +54,14 @@ if (program.use !== undefined) {
 function renderSheet(filename) {
     console.log(`Rendering ${filename}...`);
 
-    let destination = parser.parseDest(filename, program.output, program.base, program.ext);
+    let destination;
+    if (program.dir) {
+        destination = parser.parseDest(filename, program.dir, program.base, program.ext);
+    } else if (program.output) {
+        destination = parser.parseDest(filename, program.output);
+    } else {
+        console.log('todo behavior for stdout');
+    }
 
     //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
     // let result = sass.renderSync({
