@@ -182,9 +182,63 @@ function renderSheet(filename = null, stdin = null) {
         } else {
             if (destination !== '') {
                 console.log(color.red(err.formatted));
+                try {
+                    fs.mkdirSync(path.dirname(destination), {
+                        recursive: true
+                    });
+                } catch (err) {
+                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
+                }
+
+                fs.writeFile(destination, parser.emitSassError(err), (err) => {
+                    // throws an error, you could also catch it here
+                    if (err) throw err;
+
+                    // success case, the file was saved
+                    console.log(color.yellow(`Emitted error to ${destination}`));
+                })
             } else {
                 process.stderr.write(err.formatted);
             }
+            /*if (destination !== '') {
+                console.log(color.red(err.formatted));
+            } else {
+                process.stderr.write(err.formatted);
+            }*/
         }
     });
 }
+
+
+
+/*try {
+    // Take the SCSS file and convert it to CSS.
+    console.log('Rendering ' + fileToRender.location);
+    let result = SASS.renderSync({
+        file: fileToRender.location,
+        outputStyle: 'compressed',
+        sourceMap: renderSourceMaps,
+        sourceMapContents: renderSourceMaps,
+        sourceMapEmbed: renderSourceMaps,
+        outFile: fileToRender.outputName
+    });
+    fileToRender.css = result.css;
+} catch (err) {
+    fileToRender.consoleError = err.formatted;
+
+    // If there's an error, take it and make it useful to the user.
+    fileToRender.sassError = err.formatted.substr(0, err.formatted.indexOf('^'));
+    fileToRender.sassError = fileToRender.sassError.replace(/(\r\n|\n|\r)/gm, " ");
+    fileToRender.sassError = fileToRender.sassError.replace(/'/, "");
+    fileToRender.sassError = fileToRender.sassError.replace(/╷.*?│/, "");
+    fileToRender.sassError = fileToRender.sassError.replace(/│/, "");
+    fileToRender.sassError = 'Line ' + err.line + ': ' + fileToRender.sassError;
+
+    // Build a new CSS file that contains the error and puts its 
+    // content in the body.
+    let fileName = err.file.replace(/\\/g, "/");
+    fileToRender.css = "body:before { content: '" + fileToRender.sassError + "';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}";
+    fileToRender.css = fileToRender.css + "body:after { content: '" + fileName + "';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}";
+    fileToRender.css = fileToRender.css + "body * { display: none; }";
+
+}*/
