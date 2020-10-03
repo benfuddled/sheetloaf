@@ -1,5 +1,6 @@
 #!/usr/bin/env node
- //todo sourcemaps and semver and stdin
+
+const color = require('colorette');
 const sass = require('sass');
 const path = require('path');
 const fs = require('fs');
@@ -166,21 +167,21 @@ function renderSheet(filename = null, stdin = null) {
                         if (err) throw err;
 
                         // success case, the file was saved
-                        console.log(`Successfully written to ${destination}`);
+                        console.log(color.green(`Successfully written to ${destination}`));
                     })
                 } else {
                     process.stdout.write(postedResult.css);
                 }
             }).catch(err => {
                 if (destination !== '') {
-                    console.log(err);
+                    console.log(color.red(err));
                 } else {
                     process.stderr.write(err);
                 }
             })
         } else {
             if (destination !== '') {
-                console.log(err.formatted);
+                console.log(color.red(err.formatted));
             } else {
                 process.stderr.write(err.formatted);
             }

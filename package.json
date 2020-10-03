@@ -33,6 +33,7 @@
   "homepage": "https://github.com/cheddarbread/sheetloaf#readme",
   "dependencies": {
     "chokidar": "^3.4.0",
+    "colorette": "^1.2.1",
     "commander": "^6.0.0",
     "fast-glob": "^3.2.4",
     "picomatch": "^2.2.2",
