@@ -1,9 +1,12 @@
 :root {
-    --color: green; 
+    --color: green;
 }
 
 .container {
     backdrop-filter: blur(10px);
     background: var(--color);
-    
+
+    div {
+        width: 20px;
+    }
 }

@@ -1,3 +1,5 @@
+An alternative to postcss-cli for sass users.
+
 🍖 Fresh-made stylesheets for the whole family. Compile sass files to CSS and transform using postcss, all in one command.
 
 WARNING: This project is still early on and should be considered alpha quality. Expect bugs and missing features, but please feel free to install and file any issues you find :)
