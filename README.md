@@ -1,6 +1,4 @@
-An alternative to postcss-cli for sass users.
-
-🍖 Fresh-made stylesheets for the whole family. Compile sass files to CSS and transform using postcss, all in one command.
+🍖 Fresh-made stylesheets for the whole family - an alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
 
 WARNING: This project is still early on and should be considered alpha quality. Expect bugs and missing features, but please feel free to install and file any issues you find :)
 
@@ -75,11 +73,20 @@ In this case we're using the --dir option in place of output.
 For best results when using a glob pattern, make sure to use quotes to avoid side-issues. See https://medium.com/@jakubsynowiec/you-should-always-quote-your-globs-in-npm-scripts-621887a2a784
 
 
-Sheetloaf also allows for piping! Just omit the --dir/--output option:
+Sheetloaf also allows for piping!
 
 ```
-sheetloaf scss/style.scss --use autoprefixer > output.css
-sheetloaf scss/style.scss --use autoprefixer 2> error.txt 1> output.css 
+// stdin
+cat scss/style.scss | sheetloaf --use autoprefixer --output css/style.css
+
+// stdout
+sheetloaf scss/style.scss --use autoprefixer > style.css
+
+// stdout and logging to stderr
+sheetloaf scss/style.scss --use autoprefixer 2> error.txt 1> style.css 
+
+// all together now!
+cat scss/style.scss | sheetloaf --use autoprefixer 2> error.txt 1> style.css 
 ```
 
 ## FAQ
@@ -105,7 +112,5 @@ The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used t
 Many of these are already implemented in dart-sass/postcss, and the plan is to make them work as similarly to those tools as possible.
 
 * Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
-
-* Allow piping content from stdin.
 
 * When an error occurs, emit a stylesheet describing it. 
