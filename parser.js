@@ -79,7 +79,7 @@ function parseDest(filename, output, base = '', extension = '.css') {
     }
 }
 
-function getPostCSSConfig(loc) {
+function getPostCSSConfig(loc, callback) {
     let configLoc;
     if (loc != undefined) {
         configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
