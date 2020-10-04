@@ -22,15 +22,17 @@ function expandGlob(input, callback, index = 0, expanded = []) {
 
         if (isGlob === false) {
             try {
-                isDir = fs.lstatSync(path.normalize( input[index])).isDirectory();
-                isFile = fs.lstatSync(path.normalize( input[index])).isFile();
+                isDir = fs.lstatSync(path.normalize(input[index])).isDirectory();
+                isFile = fs.lstatSync(path.normalize(input[index])).isFile();
             } catch (err) {
                 throw (err);
             }
         }
 
         if (isGlob || isFile) {
-            let files = fg.sync(input[index], { dot: true }).map(entry => path.normalize(entry));
+            let files = fg.sync(input[index], {
+                dot: true
+            }).map(entry => path.normalize(entry));
             expanded.push(...files);
 
             index = index + 1;
@@ -77,7 +79,7 @@ function parseDest(filename, output, base = '', extension = '.css') {
     }
 }
 
-function getPostCSSConfig(loc) {
+function getPostCSSConfig(loc, callback) {
     let configLoc;
     if (loc != undefined) {
         configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
@@ -95,57 +97,25 @@ function getPostCSSConfig(loc) {
     }
 }
 
+/**
+ * Build a new CSS file that contains the error and puts its content in the body.
+ * @param {*} err 
+ */
+function emitSassError(err) {
+    let singleLineErr = err.formatted.substr(0, err.formatted.indexOf('^'))
+        .replace(/(\r\n|\n|\r)/gm, " ")
+        .replace(/'/, "")
+        .replace(/╷.*?│/, "")
+        .replace(/│/, "");
+
+    let fileName = err.file.replace(/\\/g, "/");
+
+    let css = `body:before { content: 'Line ${err.line}: ${singleLineErr}';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '${fileName}';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }`;
+
+    return css;
+}
+
+exports.emitSassError = emitSassError;
 exports.expandGlob = expandGlob;
 exports.parseDest = parseDest;
 exports.getPostCSSConfig = getPostCSSConfig;
-
-
-/*
-// These will most likely be done away with
-async function parseInput(input, callback) {
-    
-    if (!picomatch.scan(input).isGlob && fs.lstatSync(path.resolve(process.cwd(), input)).isDirectory()) {
-        fs.readdir(input, (err, files) => {
-            if (err) {
-                throw err;
-            } else {
-                files.forEach(file => {
-                    let fullname = path.resolve(process.cwd(), input, file);
-                    if (!fs.lstatSync(fullname).isDirectory()) {
-                        entries.push(fullname);
-                    }
-                });
-                callback(entries);
-            }
-        });
-    } else {
-        entries = fg.sync([input], { dot: true }).map(entry => path.resolve(process.cwd(), entry));
-        callback(entries);
-    }
-}
-// This too
-function parseDestination(filename, source, dest) {
-    if (picomatch.scan(source).isGlob || fs.lstatSync(path.resolve(process.cwd(), source)).isDirectory()) {
-        console.log(1);
-        let dirFromGlob = path.relative(picomatch.scan(source).base, path.dirname(filename));
-
-        let basename;
-        if (picomatch.scan(dest).isGlob) {
-            basename = path.basename(filename, path.extname(filename)) + path.extname(dest);
-        } else {
-            basename = path.basename(filename, path.extname(filename)) + '.css';
-        }
-
-        return path.resolve(process.cwd(), picomatch.scan(dest).base, dirFromGlob, basename);
-
-    } else {
-        // Is file
-        console.log(2);
-        return path.resolve(process.cwd(), dest);
-    }
-}
-
-exports.expandGlob = expandGlob;
-exports.parseInput = parseInput;
-exports.parseDestination = parseDestination;
-exports.getPostCSSConfig = getPostCSSConfig;*/

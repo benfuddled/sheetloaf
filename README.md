@@ -24,6 +24,12 @@ Sass options:
   -s, --style        Output style. Possible values are "expanded",      [string]
                      or "compressed". Default: "expanded".
   --[no-]source-map  Whether to generate source maps. Default is on.   [boolean]
+  --[no-]error-css   This flag tells Sass whether to emit a CSS file   [boolean]
+                     when an error occurs during compilation. This 
+                     CSS file describes the error in a comment and in
+                     the content property of body::before, so that 
+                     you can see the error message in the browser 
+                     without needing to switch back to the terminal.
 
 Options for use without a postcss config file:
   -u, --use      List of postcss plugins to use                          [array]
@@ -63,7 +69,7 @@ npm install autoprefixer
 
 ---
 
-You may also specify a glob pattern like so:
+You may also specify a glob pattern or directory as input like so:
 
 ```
 sheetloaf "scss/**/*.scss" --dir css --style compressed --use autoprefixer
@@ -113,6 +119,4 @@ The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used t
 
 Many of these are already implemented in dart-sass/postcss, and the plan is to make them work as similarly to those tools as possible.
 
-* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
-
-* When an error occurs, emit a stylesheet describing it. 
+* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps
