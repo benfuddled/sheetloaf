@@ -22,6 +22,12 @@ Sass options:
   -s, --style        Output style. Possible values are "expanded",      [string]
                      or "compressed". Default: "expanded".
   --[no-]source-map  Whether to generate source maps. Default is on.   [boolean]
+  --[no-]emit-error  This flag tells Sass whether to emit a CSS file   [boolean]
+                     when an error occurs during compilation. This 
+                     CSS file describes the error in a comment and in
+                     the content property of body::before, so that 
+                     you can see the error message in the browser 
+                     without needing to switch back to the terminal.
 
 Options for use without a postcss config file:
   -u, --use      List of postcss plugins to use                          [array]

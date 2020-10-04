@@ -46,7 +46,8 @@ program
     .option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
     .option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
-    .option('--no-source-map', 'Whether to generate source maps.')
+    .option('--source-map', 'Generate a source map (this is the default option).')
+    .option('--no-source-map', 'Do not generate a source map.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
@@ -115,7 +116,7 @@ function watchFiles(source) {
 }
 
 function renderSheet(filename = null, stdin = null) {
-
+    console.log(program.sourceMap !== false);
     if (stdin === null) {
         console.log(`Rendering ${filename}...`);
     }
@@ -139,23 +140,26 @@ function renderSheet(filename = null, stdin = null) {
     // });
 
     let sassOptions = {
-        sourceMap: program.sourceMap,
-        sourceMapEmbed: program.sourceMap,
         outFile: destination,
         outputStyle: program.style
     }
 
+    //https://sass-lang.com/documentation/cli/dart-sass#error-css
     if (stdin !== null) {
         sassOptions.data = stdin
+        sassOptions.sourceMap = false;
+        sassOptions.sourceMapEmbed = false;
     } else {
-        sassOptions.file = filename
+        sassOptions.file = filename;
+        sassOptions.sourceMap = program.sourceMap !== false;
+        sassOptions.sourceMapEmbed = program.sourceMap !== false;
     }
     try {
         let result = sass.renderSync(sassOptions);
         postcss(postcssConfig.plugins).process(result.css.toString(), {
             from: result.stats.entry,
             to: destination,
-            map: program.sourceMap
+            map: (stdin !== null ? false : program.sourceMap !== false)
         }).then(postedResult => {
             if (destination !== '') {
                 try {
