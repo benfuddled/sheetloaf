@@ -48,6 +48,8 @@ program
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--source-map', 'Generate a source map (this is the default option).')
     .option('--no-source-map', 'Do not generate a source map.')
+    .option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
+    .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
@@ -116,7 +118,6 @@ function watchFiles(source) {
 }
 
 function renderSheet(filename = null, stdin = null) {
-    console.log(program.sourceMap !== false);
     if (stdin === null) {
         console.log(`Rendering ${filename}...`);
     }
@@ -198,13 +199,15 @@ function renderSheet(filename = null, stdin = null) {
                 if (mkDirErr.code !== 'EEXIST' || mkDirErr.code !== 'EISDIR') throw mkDirErr
             }
 
-            fs.writeFile(destination, parser.emitSassError(e), (writeFileErr) => {
-                // throws an error, you could also catch it here
-                if (writeFileErr) throw writeFileErr;
+            if (program.errorCss !== false) {
+                fs.writeFile(destination, parser.emitSassError(e), (writeFileErr) => {
+                    // throws an error, you could also catch it here
+                    if (writeFileErr) throw writeFileErr;
 
-                // success case, the file was saved
-                console.log(color.yellow(`Emitted error to ${destination}`));
-            })
+                    // success case, the file was saved
+                    console.log(color.yellow(`Emitted error to ${destination}`));
+                })
+            }
         } else {
             process.stderr.write(e.formatted);
         }
