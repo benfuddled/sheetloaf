@@ -1,4 +1,6 @@
-🍖 Fresh-made stylesheets for the whole family - an alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
+🍖 Fresh-made stylesheets for the whole family
+
+An alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
 
 WARNING: This project is still early on and should be considered alpha quality. Expect bugs and missing features, but please feel free to install and file any issues you find :)
 
@@ -117,4 +119,4 @@ The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used t
 
 Many of these are already implemented in dart-sass/postcss, and the plan is to make them work as similarly to those tools as possible.
 
-* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps.
+* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps
