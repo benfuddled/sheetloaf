@@ -43,7 +43,8 @@ Options for use with --dir:
           in the output directory, for use with --dir     
 
 Advanced options:
-  --poll    Use polling for file watching.                             [boolean] // todo
+  --poll    Use polling for file watching. Can optionally pass polling [boolean]
+            interval; default 100 ms                          
   --config  Set a custom directory to look for a config file            [string]
 
 Misc:

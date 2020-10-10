@@ -14,9 +14,7 @@ const chokidar = require('chokidar');
 const program = new Command();
 
 let stdin = '';
-let postcssConfig = {
-    plugins: []
-};
+let postcssConfig;
 
 program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 
@@ -29,11 +27,12 @@ program
             // If user specifies --use, ignore postcss config files.
             program.use.split(',').forEach(function (plugin) {
                 postcssConfig.plugins.push(require(plugin));
-                initialRender(source);
-                watchFiles(source);
             });
+            initialRender(source);
+            watchFiles(source);
         } else {
-            postcssConfig = parser.getPostCSSConfig(program.config, function () {
+            parser.getPostCSSConfig(program.config, function (config) {
+                postcssConfig = config;
                 initialRender(source);
                 watchFiles(source);
             });
@@ -52,6 +51,7 @@ program
     .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
+    .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 
 // https: //github.com/tj/commander.js/issues/137
@@ -85,9 +85,10 @@ function initialRender(source) {
 
 function watchFiles(source) {
     if (program.watch) {
+
         chokidar.watch(source[0].split(','), {
-            usePolling: true,
-            interval: 500,
+            usePolling: (program.poll !== undefined),
+            interval: (typeof program.poll === 'number' ? program.poll : 100),
             ignoreInitial: true,
             awaitWriteFinish: {
                 stabilityThreshold: 1500,

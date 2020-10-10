@@ -83,17 +83,18 @@ function getPostCSSConfig(loc, callback) {
     let configLoc;
     if (loc != undefined) {
         configLoc = path.resolve(process.cwd(), loc, 'postcss.config.js');
+        console.log(configLoc);
     } else {
         configLoc = path.resolve(process.cwd(), 'postcss.config.js');
     }
 
     try {
         fs.lstatSync(configLoc);
-        return require(configLoc);
+        callback(require(configLoc));
     } catch (err) {
-        return {
+        callback({
             plugins: []
-        };
+        });
     }
 }
 
