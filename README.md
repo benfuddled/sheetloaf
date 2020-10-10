@@ -1,4 +1,4 @@
-🍖 Fresh-made stylesheets for the whole family
+📜🍞 Fresh-made stylesheets for the whole family
 
 An alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
 
