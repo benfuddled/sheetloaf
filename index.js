@@ -14,7 +14,9 @@ const chokidar = require('chokidar');
 const program = new Command();
 
 let stdin = '';
-let postcssConfig;
+let postcssConfig = {
+    plugins: []
+};
 
 program.version(version, '-v, --version', 'Print the version of Sheetloaf.');
 
