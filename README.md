@@ -6,6 +6,8 @@ WARNING: This project is still early on and should be considered alpha quality. 
 
 ## Usage
 
+With a few exceptions, efforts have been made to match the postcss-cli option interface. See "Sass Options" for differences.
+
 ```
 Usage:
   sheetloaf [input.css] [OPTIONS] [-o|--output output.css] [--watch|-w]
@@ -17,13 +19,24 @@ Basic options:
   -o, --output   Output file                                            [string]
   -d, --dir      Output directory                                       [string]
   -w, --watch    Watch files for changes and recompile as needed       [boolean] 
-  --verbose      Be verbose                                            [boolean] // todo
-  --env          A shortcut for setting NODE_ENV                        [string] // todo
 
 Sass options:
   -s, --style        Output style. Possible values are "expanded",      [string]
                      or "compressed". Default: "expanded".
   --[no-]source-map  Whether to generate source maps. Default is on.   [boolean]
+  --embed-source-map Tells Sass to embed the contents of the source    [boolean]
+                     map file in the generated CSS, rather than 
+                     creating a separate file and linking to it 
+                     from the CSS.
+  --embed-sources    Embed the entire contents of the Sass files that  [boolean]
+                     contributed to the generated CSS in the source map. 
+                     This may produce very large source maps, but it 
+                     guarantees that the source will be available on 
+                     any computer no matter how the CSS is served.
+  -–source-map-urls  Controls how the source maps that Sass generates   [string]
+                     link back to the Sass files that contributed to 
+                     the generated CSS. Possible values are "relative"
+                     or "absolute". Default: "relative".
   --[no-]error-css   This flag tells Sass whether to emit a CSS file   [boolean]
                      when an error occurs during compilation. This 
                      CSS file describes the error in a comment and in
@@ -60,9 +73,8 @@ sheetloaf scss/style.scss --output css/style.css --style compressed --use autopr
 ```
 
 Above is an example of transforming a sass file, compressing the output and using the 
-postcss plugin autoprefixer to add vendor prefixes. Sheetloaf will automatically ignore 
-partial files whose names begin with _. Note that postcss plugins will need to be installed
-separately, so to use autoprefixer you'd run:
+postcss plugin autoprefixer to add vendor prefixes. Note that postcss plugins will need to be installed
+separately, so to use autoprefixer you'd first run:
 
 ```
 npm install autoprefixer
@@ -77,7 +89,7 @@ sheetloaf "scss/**/*.scss" --dir css --style compressed --use autoprefixer
 sheetloaf scss --dir css --style compressed --use autoprefixer
 ```
 
-In this case we're using the --dir option in place of output.
+In this case we're using the --dir option in place of output. Sheetloaf will automatically ignore partial files whose names begin with _.
 
 For best results when using a glob pattern, make sure to use quotes to avoid side-issues. See https://medium.com/@jakubsynowiec/you-should-always-quote-your-globs-in-npm-scripts-621887a2a784
 
@@ -114,7 +126,7 @@ This works great with single files but when you've got a filewatcher on multiple
 
 You *could* do something like render sass files, output them to a temp folder, and then when those files are modified, check that with chokidar and then call postcss-cli on them to do the rest of the job. This is what I did for a while and I found it to an extremely fiddly and inelegant solution.
 
-### What's the benefit of using this over something like Gulp, Webpack, or Parcel?
+> What's the benefit of using this over something like Gulp, Webpack, or Parcel?
 
 For complex projects a more full-featured tool may be more useful, or if you prefer prefer processing all of your scripts/styles/etc in one place. 
 
@@ -129,9 +141,3 @@ Likewise, if all you're looking for is to compile Sass with no transformations, 
 ### Do all postcss plugins work?
 
 Yes, they should. However custom stringifiers/parsers are not currently supported.
-
-## Known Issues/Feature Requests
-
-Many of these are already implemented in dart-sass/postcss, and the plan is to make them work as similarly to those tools as possible.
-
-* Currently, --source-map only allows for embedded source maps. A future release will allow for the choice between embedded and external source maps
