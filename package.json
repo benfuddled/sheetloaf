@@ -1,6 +1,6 @@
 {
   "name": "sheetloaf",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "freshmade stylesheets for the whole family.",
   "main": "./index.js",
   "bin": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --style expanded --base test/samples/styles/ --no-source-map --poll 500 --config test/samples/ --watch",
+    "test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --style expanded --base test/samples/styles/ --poll 500 --config test/samples/",
     "test3": "cat test/samples/styles/file.scss | node . --style compressed --use autoprefixer ?> test/samples/render/file.css"
   },
   "repository": {
@@ -37,13 +37,16 @@
     "commander": "^6.0.0",
     "fast-glob": "^3.2.4",
     "picomatch": "^2.2.2",
-    "postcss": "^8.1.1",
     "sass": "^1.26.10"
+  },
+  "peerDependencies": {
+    "postcss": "^8.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",
     "lodash": "^4.17.19",
     "mocha": "^8.0.1",
+    "postcss": "^8.1.4",
     "postcss-custom-properties": "^10.0.0"
   }
 }

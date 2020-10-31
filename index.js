@@ -39,7 +39,6 @@ program
                 watchFiles(source);
             });
         }
-
     });
 program
     .option('-o, --output <LOCATION>', 'Output file.')
@@ -49,6 +48,9 @@ program
     .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
     .option('--source-map', 'Generate a source map (this is the default option).')
     .option('--no-source-map', 'Do not generate a source map.')
+    .option('--embed-source-map', 'Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.')
+    .option('--embed-sources', 'Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.')
+    .option('--source-map-urls <MYTHING>', 'Controls how the source maps that Sass generates link back to the Sass files that contributed to the generated CSS. ["relative", "absolute"]', 'relative')
     .option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
     .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
@@ -134,15 +136,6 @@ function renderSheet(filename = null, stdin = null) {
         destination = '';
     }
 
-    //When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
-    // let result = sass.renderSync({
-    //     file: filename,
-    //     sourceMap: true,
-    //     sourceMapEmbed: true,
-    //     outFile: destination,
-    //     outputStyle: program.style
-    // });
-
     let sassOptions = {
         outFile: destination,
         outputStyle: program.style
@@ -152,19 +145,34 @@ function renderSheet(filename = null, stdin = null) {
     if (stdin !== null) {
         sassOptions.data = stdin
         sassOptions.sourceMap = false;
-        sassOptions.sourceMapEmbed = false;
     } else {
         sassOptions.file = filename;
-        sassOptions.sourceMap = program.sourceMap !== false;
-        sassOptions.sourceMapEmbed = program.sourceMap !== false;
+        sassOptions.sourceMap = false;
+        sassOptions.sourceMapEmbed = false;
     }
+
+    let postedMapOptions = false;
+    if (stdin !== null ? false : program.sourceMap !== false) {
+        postedMapOptions = {
+            inline: (program.embedSourceMap === true ? true : false),
+            absolute: (program.sourceMapUrls === 'absolute' ? true : false),
+            sourcesContent: (program.embedSources === true ? true : false)
+        }
+    }
+
     try {
+        // When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
         let result = sass.renderSync(sassOptions);
         postcss(postcssConfig.plugins).process(result.css.toString(), {
             from: result.stats.entry,
             to: destination,
-            map: (stdin !== null ? false : program.sourceMap !== false)
+            map: postedMapOptions
         }).then(postedResult => {
+
+            postedResult.warnings().forEach(warn => {
+                process.stderr.write(warn.toString())
+            })
+
             if (destination !== '') {
                 try {
                     fs.mkdirSync(path.dirname(destination), {
@@ -181,6 +189,12 @@ function renderSheet(filename = null, stdin = null) {
                     // success case, the file was saved
                     console.log(color.green(`Successfully written to ${destination}`));
                 })
+
+                if (postedResult.map) {
+                    fs.writeFile(destination + '.map', postedResult.map.toString(), (err) => {
+                        if (err) throw err;
+                    });
+                }
             } else {
                 process.stdout.write(postedResult.css);
             }
@@ -215,67 +229,5 @@ function renderSheet(filename = null, stdin = null) {
             process.stderr.write(e.formatted);
         }
     }
-    /*
-    sass.render(sassOptions, function (err, result) {
-        if (err === null) {
-            postcss(postcssConfig.plugins).process(result.css.toString(), {
-                from: result.stats.entry,
-                to: destination,
-                map: program.sourceMap
-            }).then(postedResult => {
-                if (destination !== '') {
-                    try {
-                        fs.mkdirSync(path.dirname(destination), {
-                            recursive: true
-                        });
-                    } catch (err) {
-                        if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
-                    }
 
-                    fs.writeFile(destination, postedResult.css, (err) => {
-                        // throws an error, you could also catch it here
-                        if (err) throw err;
-
-                        // success case, the file was saved
-                        console.log(color.green(`Successfully written to ${destination}`));
-                    })
-                } else {
-                    process.stdout.write(postedResult.css);
-                }
-            }).catch(err => {
-                if (destination !== '') {
-                    console.log(color.red(err));
-                } else {
-                    process.stderr.write(err);
-                }
-            })
-        } else {
-            if (destination !== '') {
-                console.log(color.red(err.formatted));
-                try {
-                    fs.mkdirSync(path.dirname(destination), {
-                        recursive: true
-                    });
-                } catch (err) {
-                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err
-                }
-
-                fs.writeFile(destination, parser.emitSassError(err), (err) => {
-                    // throws an error, you could also catch it here
-                    if (err) throw err;
-
-                    // success case, the file was saved
-                    console.log(color.yellow(`Emitted error to ${destination}`));
-                })
-            } else {
-                process.stderr.write(err.formatted);
-            }
-            // /f (destination !== '') {
-            //     console.log(color.red(err.formatted));
-            // } else {
-            //     process.stderr.write(err.formatted);
-            // }
-        }
-    });
-    */
 }
