@@ -10,8 +10,8 @@ With a few exceptions, efforts have been made to match the postcss-cli option in
 
 ```
 Usage:
-  sheetloaf [input.css] [OPTIONS] [-o|--output output.css] [--watch|-w]
-  sheetloaf <input.css>... [OPTIONS] --dir <output-directory> [--watch|-w]
+  sheetloaf [input.scss] [OPTIONS] [-o|--output output.css] [--watch|-w]
+  sheetloaf <input.scss>... [OPTIONS] --dir <output-directory> [--watch|-w]
   sheetloaf <input-directory> [OPTIONS] --dir <output-directory> [--watch|-w]
   sheetloaf <input-glob-pattern> [OPTIONS] --dir <output-directory> [--watch|-w]
 
