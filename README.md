@@ -20,6 +20,14 @@ Basic options:
   -d, --dir      Output directory                                       [string]
   -w, --watch    Watch files for changes and recompile as needed       [boolean] 
 
+Options for use without a postcss config file:
+  -u, --use      List of postcss plugins to use                          [array]
+
+Options for use with --dir:
+  --ext   Override the output file extension; for use with --dir        [string]
+  --base  Mirror the directory structure relative to this path          [string]
+          in the output directory, for use with --dir    
+
 Sass options:
   -s, --style        Output style. Possible values are "expanded",      [string]
                      or "compressed". Default: "expanded".
@@ -42,18 +50,7 @@ Sass options:
                      CSS file describes the error in a comment and in
                      the content property of body::before, so that 
                      you can see the error message in the browser 
-                     without needing to switch back to the terminal.
-
-Options for use without a postcss config file:
-  -u, --use      List of postcss plugins to use                          [array]
-  --parser       Custom postcss parser                                  [string] // todo
-  --stringifier  Custom postcss stringifier                             [string] // todo
-  --syntax       Custom postcss syntax                                  [string] // todo
-
-Options for use with --dir:
-  --ext   Override the output file extension; for use with --dir        [string]
-  --base  Mirror the directory structure relative to this path          [string]
-          in the output directory, for use with --dir     
+                     without needing to switch back to the terminal. 
 
 Advanced options:
   --poll    Use polling for file watching. Can optionally pass polling [boolean]
@@ -138,6 +135,6 @@ Yes, but you should use [postcss-cli](https://github.com/postcss/postcss-cli) in
 
 Likewise, if all you're looking for is to compile Sass with no transformations, you can stick with [dart-sass](https://github.com/sass/dart-sass).
 
-### Do all postcss plugins work?
+### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
 
-Yes, they should. However custom stringifiers/parsers are not currently supported.
+I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with SCSS files. I'm open to be proven wrong though!
