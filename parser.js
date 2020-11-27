@@ -102,7 +102,8 @@ function emitSassError(err) {
         .replace(/(\r\n|\n|\r)/gm, " ")
         .replace(/'/, "")
         .replace(/╷.*?│/, "")
-        .replace(/│/, "");
+        .replace(/│/, "")
+        .replace(`'`, "");
 
     let fileName = err.file.replace(/\\/g, "/");
 
