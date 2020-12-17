@@ -1,3 +1,5 @@
+@use 'mixins';
+
 :root {
     --color: green;
 }
@@ -7,6 +9,7 @@
     background: var(--color);
 
     div {
+        @include mixins.happyBg;
         width: 20px;
     }
 }

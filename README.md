@@ -51,6 +51,8 @@ Sass options:
                      the content property of body::before, so that 
                      you can see the error message in the browser 
                      without needing to switch back to the terminal. 
+  -I, --load-path    Adds an additional load path for Sass to look      [string]
+                     for stylesheets.
 
 Advanced options:
   --poll    Use polling for file watching. Can optionally pass polling [boolean]

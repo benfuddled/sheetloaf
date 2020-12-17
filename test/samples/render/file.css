@@ -9,6 +9,7 @@
   background: var(--color);
 }
 .container div {
+  background-color: yellow;
   width: 20px;
 }
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3N0eWxlcy9maWxlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSxjQUFjO0FBQ2hCOztBQUVBO0VBQ0UsbUNBQTJCO1VBQTNCLDJCQUEyQjtFQUMzQixpQkFBd0I7RUFBeEIsd0JBQXdCO0FBQzFCO0FBQ0E7RUFDRSxXQUFXO0FBQ2IiLCJmaWxlIjoiZmlsZS5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyI6cm9vdCB7XG4gIC0tY29sb3I6IGdyZWVuO1xufVxuXG4uY29udGFpbmVyIHtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDEwcHgpO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1jb2xvcik7XG59XG4uY29udGFpbmVyIGRpdiB7XG4gIHdpZHRoOiAyMHB4O1xufSJdfQ== */
+/*# sourceMappingURL=file.css.map */
