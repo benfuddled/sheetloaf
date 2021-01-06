@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+ //todo try sheetloaf by itself
 const color = require('colorette');
 const sass = require('sass');
 const path = require('path');
@@ -148,8 +148,9 @@ function renderSheet(filename = null, stdin = null) {
         sassOptions.sourceMap = false;
     } else {
         sassOptions.file = filename;
-        sassOptions.sourceMap = false;
-        sassOptions.sourceMapEmbed = false;
+        sassOptions.sourceMap = (program.sourceMap === false ? false : true);
+        sassOptions.sourceMapContents = (program.sourceMap === false ? false : true);
+        sassOptions.sourceMapEmbed = (program.sourceMap === false ? false : true);
     }
 
     if (program.loadPath !== null) {
