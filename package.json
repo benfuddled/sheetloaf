@@ -32,21 +32,21 @@
   },
   "homepage": "https://github.com/cheddarbread/sheetloaf#readme",
   "dependencies": {
-    "chokidar": "^3.4.0",
-    "colorette": "^1.2.1",
+    "chokidar": "^3.5.2",
+    "colorette": "^1.2.2",
     "commander": "^6.0.0",
-    "fast-glob": "^3.2.4",
-    "picomatch": "^2.2.2",
-    "sass": "^1.32.1"
+    "fast-glob": "^3.2.6",
+    "picomatch": "^2.3.0",
+    "sass": "^1.35.1"
   },
   "peerDependencies": {
     "postcss": "^8.2.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.0.1",
-    "lodash": "^4.17.19",
-    "mocha": "^8.0.1",
-    "postcss": "^8.1.4",
+    "autoprefixer": "^10.2.6",
+    "lodash": "^4.17.21",
+    "mocha": "^8.4.0",
+    "postcss": "^8.3.5",
     "postcss-custom-properties": "^10.0.0"
   }
 }

@@ -153,7 +153,7 @@ function renderSheet(filename = null, stdin = null) {
         sassOptions.sourceMapEmbed = (program.sourceMap === false ? false : true);
     }
 
-    if (program.loadPath !== null) {
+    if (program.loadPath) {
         sassOptions.includePaths = program.loadPath.split(',');
     }
 
