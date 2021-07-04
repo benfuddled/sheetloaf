@@ -115,17 +115,17 @@ cat scss/style.scss | sheetloaf --use autoprefixer 2> error.txt 1> style.css
 
 I'll try.
 
-> Why not just use a postcss plugins that process sass like postcss-scss?
+### Why not just use a postcss plugins that process sass like postcss-scss?
 
 Postcss-scss combined with other plugins like postcss-mixins gets you in the ballpark, but in my experience there are areas of sass syntax that get missed. Sheetloaf ensures all syntax in dart-sass is covered and rendered.
 
-> Why not just use sass and pipe the output to postcss-cli?
+### Why not just use sass and pipe the output to postcss-cli?
 
 This works great with single files but when you've got a filewatcher on multiple files this isn't possible. 
 
 You *could* do something like render sass files, output them to a temp folder, and then when those files are modified, check that with chokidar and then call postcss-cli on them to do the rest of the job. This is what I did for a while and I found it to an extremely fiddly and inelegant solution.
 
-> What's the benefit of using this over something like Gulp, Webpack, or Parcel?
+### What's the benefit of using this over something like Gulp, Webpack, or Parcel?
 
 For complex projects a more full-featured tool may be more useful, or if you prefer prefer processing all of your scripts/styles/etc in one place. 
 
