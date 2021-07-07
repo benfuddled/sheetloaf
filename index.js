@@ -59,7 +59,7 @@ program
     .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 
-// https: //github.com/tj/commander.js/issues/137
+// github.com/tj/commander.js/issues/137
 if (process.stdin.isTTY) {
     program.parse(process.argv);
 } else {
