@@ -1,4 +1,4 @@
-📜🍞 Fresh-made stylesheets for the whole family
+📃🍞 Fresh-made stylesheets for the whole family
 
 An alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
 
@@ -139,4 +139,4 @@ Likewise, if all you're looking for is to compile Sass with no transformations, 
 
 ### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
 
-I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with SCSS files. I'm open to be proven wrong though!
+I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with Sass files. I'm open to be proven wrong though!

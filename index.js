@@ -1,5 +1,4 @@
 #!/usr/bin/env node
- //todo try sheetloaf by itself
 const color = require('colorette');
 const sass = require('sass');
 const path = require('path');
@@ -25,18 +24,19 @@ program
     .arguments('[sources...]')
     .description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
     .action((source) => {
-        if (program.use !== undefined) {
-            // If user specifies --use, ignore postcss config files.
-            program.use.split(',').forEach(function (plugin) {
-                postcssConfig.plugins.push(require(plugin));
+        if (source.length > 0) {
+            start(source);
+            // If source is provided, ignore pipes.
+        } else if (!process.stdin.isTTY) {
+            //github.com/tj/commander.js/issues/137
+            process.stdin.on('readable', function () {
+                var chunk = this.read();
+                if (chunk !== null) {
+                    stdin += chunk;
+                }
             });
-            initialRender(source);
-            watchFiles(source);
-        } else {
-            parser.getPostCSSConfig(program.config, function (config) {
-                postcssConfig = config;
-                initialRender(source);
-                watchFiles(source);
+            process.stdin.on('end', function () {
+                start(source);
             });
         }
     });
@@ -59,19 +59,23 @@ program
     .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 
-// https: //github.com/tj/commander.js/issues/137
-if (process.stdin.isTTY) {
-    program.parse(process.argv);
-} else {
-    process.stdin.on('readable', function () {
-        var chunk = this.read();
-        if (chunk !== null) {
-            stdin += chunk;
-        }
-    });
-    process.stdin.on('end', function () {
-        program.parse(process.argv);
-    });
+program.parse(process.argv);
+
+function start(source) {
+    if (program.use !== undefined) {
+        // If user specifies --use, ignore postcss config files.
+        program.use.split(',').forEach(function (plugin) {
+            postcssConfig.plugins.push(require(plugin));
+        });
+        initialRender(source);
+        watchFiles(source);
+    } else {
+        parser.getPostCSSConfig(program.config, function (config) {
+            postcssConfig = config;
+            initialRender(source);
+            watchFiles(source);
+        });
+    }
 }
 
 function initialRender(source) {
