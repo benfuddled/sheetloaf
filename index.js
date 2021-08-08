@@ -238,6 +238,10 @@ function renderSheet(filename = null, stdin = null) {
         } else {
             process.stderr.write(e.formatted);
         }
+
+        if (!program.watch && (process.exitCode == null || process.exitCode === 0)) {
+            process.exitCode = 1;
+        }
     }
 
 }
