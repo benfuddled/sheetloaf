@@ -1,56 +1,38 @@
 {
-  "name": "sheetloaf",
-  "version": "1.0.0-0",
-  "description": "freshmade stylesheets for the whole family.",
-  "main": "./dist/Index.js",
-  "bin": {
-    "sheetloaf": "./dist/Index.js"
-  },
-  "scripts": {
-    "build": "tsc --project tsconfig.json --watch",
-    "test": "mocha",
-    "test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --config test/samples/",
-    "test3": "cat test/samples/styles/file.scss | node . --style compressed --use autoprefixer ?> test/samples/render/file.css",
-    "test4": "node . \"test/samples/styles/**/*.scss\" --use autoprefixer"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cheddarbread/sheetloaf.git"
-  },
-  "files": [
-    "index.js",
-    "parser.js"
-  ],
-  "keywords": [
-    "scss",
-    "css",
-    "sass",
-    "processor"
-  ],
-  "author": "Benjamin Richardson",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cheddarbread/sheetloaf/issues"
-  },
-  "homepage": "https://github.com/cheddarbread/sheetloaf#readme",
-  "dependencies": {
-    "chokidar": "^3.5.2",
-    "colorette": "^1.2.2",
-    "commander": "^6.2.1",
-    "fast-glob": "^3.2.6",
-    "picomatch": "^2.3.0",
-    "sass": "^1.35.2"
-  },
-  "peerDependencies": {
-    "postcss": "^8.3.5"
-  },
-  "devDependencies": {
-    "@types/node": "^16.0.1",
-    "autoprefixer": "^10.2.6",
-    "lodash": "^4.17.21",
-    "mocha": "^8.4.0",
-    "postcss": "^8.3.5",
-    "postcss-custom-properties": "^11.0.0",
-    "typescript": "^4.3.5"
-  }
+	"name": "sheetloaf",
+	"version": "1.0.0-0",
+	"description": "freshmade stylesheets for the whole family.",
+	"main": "./dist/index.js",
+	"bin": {
+		"sheetloaf": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "rollup --config"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cheddarbread/sheetloaf.git"
+	},
+	"files": [
+		"index.js",
+		"parser.js"
+	],
+	"keywords": [
+		"scss",
+		"css",
+		"sass",
+		"processor"
+	],
+	"author": "Benjamin Richardson",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/cheddarbread/sheetloaf/issues"
+	},
+	"homepage": "https://github.com/cheddarbread/sheetloaf#readme",
+	"devDependencies": {
+		"rollup": "^2.56.3"
+	},
+	"dependencies": {
+		"commander": "^8.1.0"
+	}
 }
