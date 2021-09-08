@@ -7,7 +7,9 @@
 		"sheetloaf": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "rollup --config"
+		"build": "rollup --config --watch",
+		"test": "node . \"test/samples/styles/**/*.scss\"",
+		"test2": "cat package.json | node ."
 	},
 	"repository": {
 		"type": "git",
@@ -30,9 +32,11 @@
 	},
 	"homepage": "https://github.com/cheddarbread/sheetloaf#readme",
 	"devDependencies": {
+		"eslint": "^7.32.0",
 		"rollup": "^2.56.3"
 	},
 	"dependencies": {
+		"colorette": "^1.4.0",
 		"commander": "^8.1.0"
 	}
 }
