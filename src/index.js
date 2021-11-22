@@ -1,12 +1,12 @@
-const ver = require('../package.json').version
-const path = require('path')
-const fs = require('fs')
-const color = require('picocolors')
-const { Command } = require('commander')
+const ver = require('../package.json').version;
+const path = require('path');
+const fs = require('fs');
+const color = require('picocolors');
+const { Command } = require('commander');
 
-const sheetloaf = new Command()
+const sheetloaf = new Command();
 
-sheetloaf.version(ver, '-v, --version', 'Print the version of Sheetloaf.')
+sheetloaf.version(ver, '-v, --version', 'Print the version of Sheetloaf.');
 
 sheetloaf
 	.arguments('[sources...]')
@@ -14,21 +14,21 @@ sheetloaf
 	.action((source) => {
 		if (source.length > 0) {
 			// If source is provided, we ignore pipes.
-			initWithSources(source)
+			initWithSources(source);
 		} else if (!process.stdin.isTTY) {
 			// see github.com/tj/commander.js/issues/137
-			let stdin = ''
+			let stdin = '';
 			process.stdin.on('readable', function () {
-				var chunk = this.read()
+				var chunk = this.read();
 				if (chunk !== null) {
-					stdin += chunk
+					stdin += chunk;
 				}
-			})
+			});
 			process.stdin.on('end', function () {
-				init(stdin)
-			})
+				init(stdin);
+			});
 		}
-	})
+	});
 
 sheetloaf
 	.option('-o, --output <LOCATION>', 'Output file.')
@@ -47,40 +47,41 @@ sheetloaf
 	.option('-w, --watch', 'Watch stylesheets and recompile when they change.')
 	.option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
 	.option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
-	.option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
+	.option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.');
 
-sheetloaf.parse(process.argv)
+sheetloaf.parse(process.argv);
 
 function init(stdin) {
-	console.log(stdin)
-	generateConfig()
+	console.log(stdin);
+	generatePostcssConfig();
 }
 
 function initWithSources(sources) {
-	console.log(sources)
-	generateConfig()
+	console.log(sources);
+	generatePostcssConfig(() => {});
 }
 
-function generateConfig() {
+function generatePostcssConfig(callback) {
 	let postcssConfig = {
 		plugins: []
-	}
+	};
 
 	// If user specifies --use, ignore postcss config files.
 	if (sheetloaf.use !== undefined) {
 		sheetloaf.use.split(',').forEach(function (plugin) {
-			postcssConfig.plugins.push(require(plugin))
-		})
+			postcssConfig.plugins.push(require(plugin));
+		});
 	} else {
-		let loc
+		let configFileLoc;
 		if (sheetloaf.config != undefined) {
-			loc = path.resolve(process.cwd(), sheetloaf.config, 'postcss.config.js')
+			configFileLoc = path.resolve(process.cwd(), sheetloaf.config, 'postcss.config.js');
 		} else {
-			loc = path.resolve(process.cwd(), 'postcss.config.js')
+			configFileLoc = path.resolve(process.cwd(), 'postcss.config.js');
 		}
 
 		try {
-			fs.lstatSync(loc)
+			fs.lstatSync(configFileLoc);
+			postcssConfig = require(configFileLoc);
 		} catch (e) {
 			//TODO
 		}

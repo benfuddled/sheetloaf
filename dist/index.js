@@ -1548,13 +1548,14 @@ sheetloaf.option("-o, --output <LOCATION>", "Output file.").option("--dir <LOCAT
 sheetloaf.parse(process.argv);
 function init(stdin) {
   console.log(stdin);
-  generateConfig();
+  generatePostcssConfig();
 }
 function initWithSources(sources) {
   console.log(sources);
-  generateConfig();
+  generatePostcssConfig(() => {
+  });
 }
-function generateConfig() {
+function generatePostcssConfig(callback) {
   let postcssConfig = {
     plugins: []
   };
@@ -1563,14 +1564,15 @@ function generateConfig() {
       postcssConfig.plugins.push(require(plugin));
     });
   } else {
-    let loc;
+    let configFileLoc;
     if (sheetloaf.config != void 0) {
-      loc = path.resolve(process.cwd(), sheetloaf.config, "postcss.config.js");
+      configFileLoc = path.resolve(process.cwd(), sheetloaf.config, "postcss.config.js");
     } else {
-      loc = path.resolve(process.cwd(), "postcss.config.js");
+      configFileLoc = path.resolve(process.cwd(), "postcss.config.js");
     }
     try {
-      fs.lstatSync(loc);
+      fs.lstatSync(configFileLoc);
+      postcssConfig = require(configFileLoc);
     } catch (e) {
     }
   }
