@@ -326,41 +326,46 @@ function expandGlob(input: string[], callback, index: number = 0, expanded: stri
 	}
 }
 
+/**
+ *
+ * @param filename
+ * @returns path, or a blank string if the combination of options provided does not give a valid path.
+ */
 function parseDestination(filename: string) {
-	let output: string = '',
+	let outFile: string = '',
+		dir: string = '',
 		mirror: string = '',
 		base: string = '',
 		extension: string = '.css';
 
 	let result: string = '';
 
-	// if (sheetloaf.opts().base && usingStdin)
+	extension = sheetloaf.opts().ext ? sheetloaf.opts().ext : '';
+	outFile = sheetloaf.opts().output ? sheetloaf.opts().output : '';
 
-	// if (path.extname(output) === '') {
-	//     let mirror = (base !== '' ? path.dirname(filename.replace(path.join(base, '/'), '')) : '');
-	//     return path.join(output, mirror, path.basename(filename, path.extname(filename)) + extension);
-	// } else {
-	//     return output;
-	// }
+	if (usingStdin === false) {
+		dir = sheetloaf.opts().dir ? sheetloaf.opts().dir : '';
+		base = sheetloaf.opts().base ? sheetloaf.opts().base : '';
 
-	if (sheetloaf.opts().dir && usingStdin === false) {
-		output = sheetloaf.opts().dir;
-		base = sheetloaf.opts().base;
-		extension = sheetloaf.opts().ext;
-	} else if (sheetloaf.opts().output) {
-		output = sheetloaf.opts().output();
-	}
-
-	if (path.extname(output) === '') {
-		if (base !== '') {
-			mirror = path.dirname(filename.replace(path.join(base, '/'), ''));
+		if (dir.length > 0) {
+			if (base.length > 0) {
+				mirror = path.dirname(filename.replace(path.join(base, '/'), ''));
+			}
+			result = path.join(dir, mirror, path.basename(filename, path.extname(filename)) + extension);
+		} else if (outFile.length > 0) {
+			result = outFile;
+		} else {
+			result = '';
 		}
-		result = path.join(output, mirror, path.basename(filename, path.extname(filename)) + extension);
 	} else {
-		result = output;
+		if (outFile.length > 0) {
+			result = outFile;
+		} else {
+			result = '';
+		}
 	}
 
-	return result as string;
+	return result;
 }
 
 /**
