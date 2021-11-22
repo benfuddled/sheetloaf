@@ -234,6 +234,11 @@ function render(source) {
 }
 
 function generateSassOptions(source: string, destination: string) {
+	let paths = [];
+	if (sheetloaf.opts().loadPath) {
+		let paths = sheetloaf.opts().loadPath.split(',');
+	}
+
 	if (usingStdin === true) {
 		return {
 			outFile: destination,
@@ -242,7 +247,7 @@ function generateSassOptions(source: string, destination: string) {
 			sourceMap: false,
 			sourceMapContents: false,
 			sourceMapEmbed: false,
-			includePaths: sheetloaf.opts().loadPath.split(',')
+			includePaths: paths
 		};
 	} else {
 		return {
@@ -252,7 +257,7 @@ function generateSassOptions(source: string, destination: string) {
 			sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
 			sourceMapContents: sheetloaf.opts().sourceMap === false ? false : true,
 			sourceMapEmbed: sheetloaf.opts().sourceMap === false ? false : true,
-			includePaths: sheetloaf.opts().loadPath.split(',')
+			includePaths: paths
 		};
 	}
 }

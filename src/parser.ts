@@ -13,7 +13,7 @@ function generatePostcssConfig(config: string, use: string) {
 		plugins: []
 	};
 	// If user specifies --use, we ignore postcss config files.
-	if (use !== undefined) {
+	if (use) {
 		use.split(',').forEach(function (plugin) {
 			obj.plugins.push(require(plugin));
 		});
