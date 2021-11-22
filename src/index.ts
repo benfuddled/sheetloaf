@@ -236,7 +236,7 @@ function render(source) {
 function generateSassOptions(source: string, destination: string) {
 	let paths = [];
 	if (sheetloaf.opts().loadPath) {
-		let paths = sheetloaf.opts().loadPath.split(',');
+		paths = sheetloaf.opts().loadPath.split(',');
 	}
 
 	if (usingStdin === true) {
