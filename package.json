@@ -7,8 +7,8 @@
 		"sheetloaf": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "rollup --config --watch",
-		"test": "node . \"test/samples/styles/**/*.scss\"",
+		"build": "esbuild src/index.js --outdir=dist --bundle --platform=node --target=node10.4 --watch",
+		"test": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --config test/samples/",
 		"test2": "cat package.json | node ."
 	},
 	"repository": {
@@ -32,11 +32,10 @@
 	},
 	"homepage": "https://github.com/cheddarbread/sheetloaf#readme",
 	"devDependencies": {
-		"eslint": "^7.32.0",
-		"rollup": "^2.56.3"
+		"esbuild": "^0.13.15"
 	},
 	"dependencies": {
-		"colorette": "^1.4.0",
-		"commander": "^8.1.0"
+		"commander": "^8.1.0",
+		"picocolors": "^1.0.0"
 	}
 }

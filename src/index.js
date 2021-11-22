@@ -1,7 +1,7 @@
 const ver = require('../package.json').version
 const path = require('path')
 const fs = require('fs')
-const color = require('colorette')
+const color = require('picocolors')
 const { Command } = require('commander')
 
 const sheetloaf = new Command()
@@ -14,9 +14,9 @@ sheetloaf
 	.action((source) => {
 		if (source.length > 0) {
 			// If source is provided, we ignore pipes.
-			initWithSource(source)
+			initWithSources(source)
 		} else if (!process.stdin.isTTY) {
-			//github.com/tj/commander.js/issues/137
+			// see github.com/tj/commander.js/issues/137
 			let stdin = ''
 			process.stdin.on('readable', function () {
 				var chunk = this.read()
@@ -36,7 +36,7 @@ sheetloaf
 	.option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
 	.option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
 	.option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
-	.option('--source-map','Generate a source map (this is the default option).')
+	.option('--source-map', 'Generate a source map (this is the default option).')
 	.option('--no-source-map', 'Do not generate a source map.')
 	.option('--embed-source-map', 'Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.')
 	.option('--embed-sources', 'Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.')
@@ -47,7 +47,7 @@ sheetloaf
 	.option('-w, --watch', 'Watch stylesheets and recompile when they change.')
 	.option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
 	.option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
-	.option('-u, --use <PLUGINS>','List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
+	.option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
 
 sheetloaf.parse(process.argv)
 
@@ -56,7 +56,7 @@ function init(stdin) {
 	generateConfig()
 }
 
-function initWithSource(sources) {
+function initWithSources(sources) {
 	console.log(sources)
 	generateConfig()
 }
@@ -65,7 +65,7 @@ function generateConfig() {
 	let postcssConfig = {
 		plugins: []
 	}
-	
+
 	// If user specifies --use, ignore postcss config files.
 	if (sheetloaf.use !== undefined) {
 		sheetloaf.use.split(',').forEach(function (plugin) {
