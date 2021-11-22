@@ -44,14 +44,28 @@ sheetloaf
 sheetloaf
 	.option('-o, --output <LOCATION>', 'Output file.')
 	.option('--dir <LOCATION>', 'Output directory.')
-	.option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
+	.option(
+		'--base <DIR>',
+		'Mirror the directory structure relative to this path in the output directory, for use with --dir.',
+		''
+	)
 	.option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
 	.option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
 	.option('--source-map', 'Generate a source map (this is the default option).')
 	.option('--no-source-map', 'Do not generate a source map.')
-	.option('--embed-source-map', 'Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.')
-	.option('--embed-sources', 'Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.')
-	.option('--source-map-urls <TYPE>', 'Controls how the source maps that Sass generates link back to the Sass files  that contributed to the generated CSS. ["relative", "absolute"]', 'relative')
+	.option(
+		'--embed-source-map',
+		'Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.'
+	)
+	.option(
+		'--embed-sources',
+		'Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.'
+	)
+	.option(
+		'--source-map-urls <TYPE>',
+		'Controls how the source maps that Sass generates link back to the Sass files  that contributed to the generated CSS. ["relative", "absolute"]',
+		'relative'
+	)
 	.option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
 	.option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
 	.option('-I, --load-path <PATHS>', 'Adds an additional load path for Sass to look for stylesheets.')
@@ -63,7 +77,7 @@ sheetloaf
 sheetloaf.parse(process.argv);
 
 function init(source) {
-	postcssConfig = generatePostcssConfig();
+	postcssConfig = parser.generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
 
 	if (usingStdin === true) {
 		render(source);
@@ -121,7 +135,14 @@ function render(source) {
 		console.log(`Rendering ${source}...`);
 	}
 
-	let destination = parseDestination(source);
+	let destination = parser.createDestination(
+		source,
+		sheetloaf.opts().output,
+		sheetloaf.opts().dir,
+		sheetloaf.opts().base,
+		sheetloaf.opts().ext,
+		usingStdin
+	);
 	let sassOptions = generateSassOptions(source, destination);
 
 	let postcssMapOptions: object | boolean = {
@@ -212,40 +233,6 @@ function render(source) {
 	}
 }
 
-/**
- * Generates an object used for postcss configuration.
- */
-function generatePostcssConfig() {
-	let config = {
-		plugins: []
-	};
-	// If user specifies --use, we ignore postcss config files.
-	if (sheetloaf.opts().use !== undefined) {
-		sheetloaf
-			.opts()
-			.use.split(',')
-			.forEach(function (plugin) {
-				config.plugins.push(require(plugin));
-			});
-	} else {
-		let configFileLoc;
-		if (sheetloaf.opts().config !== undefined) {
-			configFileLoc = path.resolve(process.cwd(), sheetloaf.opts().config, 'postcss.config.js');
-		} else {
-			configFileLoc = path.resolve(process.cwd(), 'postcss.config.js');
-		}
-
-		try {
-			fs.lstatSync(configFileLoc);
-			config = require(configFileLoc);
-		} catch (e) {
-			// TODO
-		}
-
-		return config;
-	}
-}
-
 function generateSassOptions(source: string, destination: string) {
 	if (usingStdin === true) {
 		return {
@@ -268,48 +255,6 @@ function generateSassOptions(source: string, destination: string) {
 			includePaths: sheetloaf.opts().loadPath.split(',')
 		};
 	}
-}
-
-/**
- *
- * @param filename
- * @returns path, or a blank string if the combination of options provided does not give a valid path.
- */
-function parseDestination(filename: string) {
-	let outFile: string = '',
-		dir: string = '',
-		mirror: string = '',
-		base: string = '',
-		extension: string = '.css';
-
-	let result: string = '';
-
-	extension = sheetloaf.opts().ext ? sheetloaf.opts().ext : '';
-	outFile = sheetloaf.opts().output ? sheetloaf.opts().output : '';
-
-	if (usingStdin === false) {
-		dir = sheetloaf.opts().dir ? sheetloaf.opts().dir : '';
-		base = sheetloaf.opts().base ? sheetloaf.opts().base : '';
-
-		if (dir.length > 0) {
-			if (base.length > 0) {
-				mirror = path.dirname(filename.replace(path.join(base, '/'), ''));
-			}
-			result = path.join(dir, mirror, path.basename(filename, path.extname(filename)) + extension);
-		} else if (outFile.length > 0) {
-			result = outFile;
-		} else {
-			result = '';
-		}
-	} else {
-		if (outFile.length > 0) {
-			result = outFile;
-		} else {
-			result = '';
-		}
-	}
-
-	return result;
 }
 
 /**

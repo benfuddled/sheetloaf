@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"build": "esbuild src/*.ts --outdir=dist --bundle --platform=node --target=node10.4 --watch --sourcemap=inline",
-		"test": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --config test/samples/ --watch",
+		"test": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --use autoprefixer,postcss-custom-properties --watch",
 		"test2": "cat package.json | node .",
 		"test3": "mocha"
 	},
@@ -37,6 +37,7 @@
 		"@types/node": "^16.11.9",
 		"autoprefixer": "^10.4.0",
 		"esbuild": "^0.13.15",
+		"lodash": "^4.17.21",
 		"mocha": "^9.1.3",
 		"postcss": "^8.3.11",
 		"postcss-custom-properties": "^12.0.0",
