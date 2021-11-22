@@ -46,6 +46,7 @@
 		"postcss": "^8.2.0"
 	},
 	"dependencies": {
+		"@types/node": "^16.11.9",
 		"chokidar": "^3.5.2",
 		"commander": "^8.1.0",
 		"fast-glob": "^3.2.7",
