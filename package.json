@@ -7,8 +7,8 @@
 		"sheetloaf": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "esbuild src/index.ts --outdir=dist --bundle --platform=node --target=node10.4 --watch --sourcemap=inline",
-		"test": "node . \"tests/samples/styles/**/*.scss\" --dir \"tests/samples/render/\" --load-path \"tests/samples/lib\" --style expanded --base tests/samples/styles/ --poll 500 --config tests/samples/ --watch",
+		"build": "esbuild src/*.ts --outdir=dist --bundle --platform=node --target=node10.4 --watch --sourcemap=inline",
+		"test": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --config test/samples/ --watch",
 		"test2": "cat package.json | node .",
 		"test3": "mocha"
 	},
@@ -40,6 +40,7 @@
 		"mocha": "^9.1.3",
 		"postcss": "^8.3.11",
 		"postcss-custom-properties": "^12.0.0",
+		"ts-node": "^10.4.0",
 		"typescript": "^4.5.2"
 	},
 	"peerDependencies": {
