@@ -1,12 +1,6 @@
-/home/ben/Git Projects/sheetloaf/dist/index.js:105170
-      includePaths: sheetloaf.opts().loadPath.split(",")
-                                             ^
-
-TypeError: Cannot read property 'split' of undefined
-    at generateSassOptions (/home/ben/Git Projects/sheetloaf/dist/index.js:105170:46)
-    at render (/home/ben/Git Projects/sheetloaf/dist/index.js:105086:21)
-    at init (/home/ben/Git Projects/sheetloaf/dist/index.js:105038:5)
-    at Socket.<anonymous> (/home/ben/Git Projects/sheetloaf/dist/index.js:105029:7)
-    at Socket.emit (events.js:412:35)
-    at endReadableNT (internal/streams/readable.js:1334:12)
-    at processTicksAndRejections (internal/process/task_queues.js:82:21)
+Error: expected "{".
+  ╷
+9 │ } jasldfjkasj; kfjq;wkjf[23rjr23 dj lwdj ;LFKJAS;LDKJ AS;DLJF AS;LKDJFQ3 EDJ ]
+  │              ^
+  ╵
+  stdin 9:14  root stylesheet
