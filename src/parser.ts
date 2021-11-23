@@ -1,4 +1,4 @@
-import { generate } from 'fast-glob/out/managers/tasks';
+export {};
 
 const picomatch = require('picomatch');
 const fg = require('fast-glob');

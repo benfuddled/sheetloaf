@@ -1,4 +1,4 @@
-import { config } from 'process';
+export {};
 
 const chokidar = require('chokidar');
 const color = require('picocolors');
