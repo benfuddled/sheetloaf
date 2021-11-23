@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const chokidar = require('chokidar');
 const color = require('picocolors');
 const { Command } = require('commander');
