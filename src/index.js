@@ -1,5 +1,3 @@
-export {};
-
 const chokidar = require('chokidar');
 const color = require('picocolors');
 const { Command } = require('commander');
@@ -15,7 +13,7 @@ const sheetloaf = new Command();
 let postcssConfig = {
 	plugins: []
 };
-let usingStdin: boolean = false;
+let usingStdin = false;
 
 sheetloaf.version(ver, '-v, --version', 'Print the version of Sheetloaf.');
 sheetloaf
@@ -145,7 +143,7 @@ function render(source) {
 	);
 	let sassOptions = generateSassOptions(source, destination);
 
-	let postcssMapOptions: object | boolean = {
+	let postcssMapOptions = {
 		inline: sheetloaf.opts().embedSourceMap === true ? true : false,
 		absolute: sheetloaf.opts().sourceMapUrls === 'absolute' ? true : false,
 		sourcesContent: sheetloaf.opts().embedSources === true ? true : false
@@ -233,33 +231,26 @@ function render(source) {
 	}
 }
 
-function generateSassOptions(source: string, destination: string) {
-	let paths = [];
-	if (sheetloaf.opts().loadPath) {
-		paths = sheetloaf.opts().loadPath.split(',');
-	}
+function generateSassOptions(source, destination) {
+    let obj = {
+        outFile: destination,
+        outputStyle: sheetloaf.opts().style,
+        includePaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : []
+    }
 
 	if (usingStdin === true) {
-		return {
-			outFile: destination,
-			outputStyle: sheetloaf.opts().style,
-			data: source,
-			sourceMap: false,
-			sourceMapContents: false,
-			sourceMapEmbed: false,
-			includePaths: paths
-		};
+		obj.data = source;
+		obj.sourceMap = false;
+        obj.sourceMapContents = false;
+        obj.sourceMapEmbed = false;
 	} else {
-		return {
-			outFile: destination,
-			outputStyle: sheetloaf.opts().style,
-			file: source,
-			sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
-			sourceMapContents: sheetloaf.opts().sourceMap === false ? false : true,
-			sourceMapEmbed: sheetloaf.opts().sourceMap === false ? false : true,
-			includePaths: paths
-		};
+		obj.file = source;
+        obj.sourceMap = sheetloaf.opts().sourceMap === false ? false : true;
+		obj.sourceMapContents = sheetloaf.opts().sourceMap === false ? false : true;
+		obj.sourceMapEmbed =sheetloaf.opts().sourceMap === false ? false : true;
 	}
+
+    return obj;
 }
 
 /**

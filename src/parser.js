@@ -1,5 +1,3 @@
-export {};
-
 const picomatch = require('picomatch');
 const fg = require('fast-glob');
 const fs = require('fs');
@@ -8,7 +6,7 @@ const path = require('path');
 /**
  * Generates an object used for postcss configuration.
  */
-function generatePostcssConfig(config: string, use: string) {
+function generatePostcssConfig(config, use) {
 	let obj = {
 		plugins: []
 	};
@@ -39,7 +37,7 @@ function generatePostcssConfig(config: string, use: string) {
  * Given an array of input sources, expand any globs and validate that inputs exist.
  *
  */
-function expandGlob(input: string[], callback, index: number = 0, expanded: string[] = []) {
+function expandGlob(input, callback, index = 0, expanded = []) {
 	if (index < input.length) {
 		let isGlob = false;
 		let isDir = false;
@@ -95,9 +93,9 @@ function expandGlob(input: string[], callback, index: number = 0, expanded: stri
  * @param filename
  * @returns path, or a blank string if the combination of options provided does not give a valid path.
  */
-function createDestination(filename: string, outFile, dir, base, extension, usingStdin: boolean) {
-	let result: string = '';
-	let mirror: string = '';
+function createDestination(filename, outFile, dir, base, extension, usingStdin) {
+	let result = '';
+	let mirror = '';
 
 	if (!outFile) outFile = '';
 	if (!extension) extension = '.css';
