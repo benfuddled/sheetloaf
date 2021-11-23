@@ -18,7 +18,7 @@ let usingStdin = false;
 sheetloaf.version(ver, '-v, --version', 'Print the version of Sheetloaf.');
 sheetloaf
 	.arguments('[sources...]')
-	.description('🍖 Compile Sass to CSS and transform the output using PostCSS all in one command.')
+	.description('📃🍞 Compile Sass to CSS and transform the output using PostCSS all in one command.')
 	.action((source) => {
 		if (source.length > 0) {
 			// If source is provided, we ignore pipes.
@@ -232,25 +232,25 @@ function render(source) {
 }
 
 function generateSassOptions(source, destination) {
-    let obj = {
-        outFile: destination,
-        outputStyle: sheetloaf.opts().style,
-        includePaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : []
-    }
+	let obj = {
+		outFile: destination,
+		outputStyle: sheetloaf.opts().style,
+		includePaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : []
+	};
 
 	if (usingStdin === true) {
 		obj.data = source;
 		obj.sourceMap = false;
-        obj.sourceMapContents = false;
-        obj.sourceMapEmbed = false;
+		obj.sourceMapContents = false;
+		obj.sourceMapEmbed = false;
 	} else {
 		obj.file = source;
-        obj.sourceMap = sheetloaf.opts().sourceMap === false ? false : true;
+		obj.sourceMap = sheetloaf.opts().sourceMap === false ? false : true;
 		obj.sourceMapContents = sheetloaf.opts().sourceMap === false ? false : true;
-		obj.sourceMapEmbed =sheetloaf.opts().sourceMap === false ? false : true;
+		obj.sourceMapEmbed = sheetloaf.opts().sourceMap === false ? false : true;
 	}
 
-    return obj;
+	return obj;
 }
 
 /**

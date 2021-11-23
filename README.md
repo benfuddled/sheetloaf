@@ -2,7 +2,19 @@
 
 An alternative to postcss-cli for sass users. Compile sass files to CSS and transform using postcss, all in one command.
 
-WARNING: This project should be considered beta quality. Expect bugs, but please feel free to install and file any issues you find :)
+## Installation
+
+Using npm (or your package manager of choice):
+
+```
+npm install sheetloaf
+```
+
+Sheetloaf also requires a peer dependency of postcss, so go ahead and run:
+
+```
+npm install postcss
+```
 
 ## Usage
 
@@ -64,22 +76,6 @@ Misc:
   -h, --help     Show help                                             [boolean]
 
 ```
-
-## Installation
-
-Using npm (or your package manager of choice):
-
-```
-npm install sheetloaf
-```
-
-Sheetloaf also requires a peer dependency of postcss, so go ahead and run:
-
-```
-npm install postcss
-```
-
-You're good to go!
 
 ## Examples
 
@@ -151,6 +147,10 @@ The benefit of Sheetloaf is fewer dependencies and build simplicity. I've used t
 Yes, but you should use [postcss-cli](https://github.com/postcss/postcss-cli) in that case, as you'll be incurring a performance hit for no good reason. This project is intended to simplify the two-step process of rendering Sass files and then transforming the output with PostCSS.
 
 Likewise, if all you're looking for is to compile Sass with no transformations, you can stick with [dart-sass](https://github.com/sass/dart-sass).
+
+### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
+
+I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with Sass files. I'm open to be proven wrong though!
 
 ### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
 
