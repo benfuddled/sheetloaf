@@ -151,7 +151,3 @@ Likewise, if all you're looking for is to compile Sass with no transformations, 
 ### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
 
 I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with Sass files. I'm open to be proven wrong though!
-
-### Why doesn't sheetloaf support custom stringifiers/syntaxes/parsers?
-
-I don't currently see a good use case for including these, since sheetloaf is currently intended to only be used with Sass files. I'm open to be proven wrong though!
