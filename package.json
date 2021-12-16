@@ -18,8 +18,7 @@
 		"url": "git+https://github.com/cheddarbread/sheetloaf.git"
 	},
 	"files": [
-		"index.js",
-		"parser.js"
+		"dist/*.js"
 	],
 	"keywords": [
 		"scss",
