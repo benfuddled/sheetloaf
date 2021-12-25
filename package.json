@@ -1,6 +1,6 @@
 {
 	"name": "sheetloaf",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "freshmade stylesheets for the whole family.",
 	"main": "./dist/index.js",
 	"bin": {
@@ -9,7 +9,7 @@
 	"scripts": {
 		"build": "esbuild src/*.js --outdir=dist --platform=node --target=node10.4 --minify",
 		"test": "mocha",
-		"test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style expanded --base test/samples/styles/ --poll 500 --use autoprefixer,postcss-custom-properties",
+		"test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style compressed --base test/samples/styles/ --poll 500 --use autoprefixer,postcss-custom-properties",
 		"test3": "cat test/samples/styles/file.scss | node . --style compressed --use autoprefixer --load-path test/samples/styles > test/samples/render/file.css",
 		"test4": "cat test/samples/styles/file-with-error.scss | node . --style compressed --use autoprefixer > test/samples/render/file.css 2> test/samples/logs/error.log"
 	},
@@ -34,21 +34,21 @@
 	"homepage": "https://github.com/cheddarbread/sheetloaf#readme",
 	"devDependencies": {
 		"autoprefixer": "^10.4.0",
-		"esbuild": "^0.13.15",
+		"esbuild": "^0.14.8",
 		"lodash": "^4.17.21",
 		"mocha": "^9.1.3",
-		"postcss": "^8.3.11",
-		"postcss-custom-properties": "^12.0.0"
+		"postcss": "^8.4.5",
+		"postcss-custom-properties": "^12.0.1"
 	},
 	"peerDependencies": {
-		"postcss": "^8.2.0"
+		"postcss": "^8.1.0"
 	},
 	"dependencies": {
 		"chokidar": "^3.5.2",
-		"commander": "^8.1.0",
+		"commander": "^8.3.0",
 		"fast-glob": "^3.2.7",
 		"picocolors": "^1.0.0",
 		"picomatch": "^2.3.0",
-		"sass": "^1.43.4"
+		"sass": "^1.45.1"
 	}
 }

@@ -151,7 +151,7 @@ function render(source) {
 		sourcesContent: sheetloaf.opts().embedSources === true ? true : false
 	};
 
-	if (usingStdin === false && sheetloaf.opts().sourceMap !== false) {
+	if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
 		postcssMapOptions = false;
 	}
 
