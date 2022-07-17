@@ -40,7 +40,7 @@ sheetloaf
 			});
 		}
 	});
-
+// TODO: Add option for async
 sheetloaf
 	.option('-o, --output <LOCATION>', 'Output file.')
 	.option('--dir <LOCATION>', 'Output directory.')
@@ -157,7 +157,9 @@ function render(source) {
 
 	try {
 		// When using Dart Sass, renderSync() is more than twice as fast as render(), due to the overhead of asynchronous callbacks.
+		// TODO: Use updated api. This probably requires rethinking the sassOptions object https://sass-lang.com/documentation/js-api/
 		let sassResult = sass.renderSync(sassOptions);
+		sass.render();
 
 		postcss(postcssConfig.plugins)
 			.process(sassResult.css.toString(), {
