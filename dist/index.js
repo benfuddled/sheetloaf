@@ -1,5 +1,28 @@
 #!/usr/bin/env node
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -49,6 +72,7 @@ var picomatch_1 = __importDefault(require("picomatch"));
 var fast_glob_1 = __importDefault(require("fast-glob"));
 var sass_1 = __importDefault(require("sass"));
 var postcss_1 = __importDefault(require("postcss"));
+var configs = __importStar(require("./configs"));
 var sheetloaf = new commander_1.Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 var usingStdin = false;
@@ -59,9 +83,24 @@ sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
     .action(function (source) {
-    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
-    renderAllFiles(source);
-    watch(source);
+    postcssConfig = configs.generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+    if (source.length > 0) {
+        renderAllFiles(source);
+        watch(source);
+    }
+    else if (!process.stdin.isTTY) {
+        var stdin_1 = '';
+        process.stdin.on('readable', function () {
+            var chunk = process.stdin.read();
+            if (chunk !== null) {
+                stdin_1 += chunk;
+            }
+        });
+        process.stdin.on('end', function () {
+            usingStdin = true;
+            renderSassFromStdin(stdin_1);
+        });
+    }
 });
 sheetloaf
     .option('-o, --output <LOCATION>', 'Output file.')
@@ -87,8 +126,7 @@ function renderAllFiles(source) {
     expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path_1["default"].basename(fileName).charAt(0) !== '_') {
-                var destination = buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
-                renderSass(fileName, destination);
+                renderSass(fileName);
             }
         });
     });
@@ -115,41 +153,66 @@ function watch(source) {
         });
     }
 }
-function renderSass(fileName, destination) {
+function renderSass(fileName) {
     return __awaiter(this, void 0, void 0, function () {
-        var options, result, options, result, e_1;
+        var destination, options, result, options, result, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 4, , 5]);
-                    if (!(sheetloaf.opts().async === true)) return [3, 2];
-                    options = {
-                        style: sheetloaf.opts().style,
-                        loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
-                        sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
-                        sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
-                    };
-                    return [4, sass_1["default"].compileAsync(fileName, options)];
+                    destination = buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+                    _a.label = 1;
                 case 1:
+                    _a.trys.push([1, 5, , 6]);
+                    if (!(sheetloaf.opts().async === true)) return [3, 3];
+                    options = configs.generateSassOptionsAsync(sheetloaf.opts());
+                    return [4, sass_1["default"].compileAsync(fileName, options)];
+                case 2:
                     result = _a.sent();
                     renderPost(fileName, destination, result);
-                    return [3, 3];
-                case 2:
-                    options = {
-                        style: sheetloaf.opts().style,
-                        loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
-                        sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
-                        sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
-                    };
+                    return [3, 4];
+                case 3:
+                    options = configs.generateSassOptions(sheetloaf.opts());
                     result = sass_1["default"].compile(fileName, options);
                     renderPost(fileName, destination, result);
-                    _a.label = 3;
-                case 3: return [3, 5];
-                case 4:
+                    _a.label = 4;
+                case 4: return [3, 6];
+                case 5:
                     e_1 = _a.sent();
                     sassErrorCatcher(e_1, destination);
-                    return [3, 5];
-                case 5: return [2];
+                    return [3, 6];
+                case 6: return [2];
+            }
+        });
+    });
+}
+function renderSassFromStdin(text) {
+    return __awaiter(this, void 0, void 0, function () {
+        var destination, options, result, options, result, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    destination = buildDestinationPath('', sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 5, , 6]);
+                    if (!(sheetloaf.opts().async === true)) return [3, 3];
+                    options = configs.generateSassOptionsAsync(sheetloaf.opts());
+                    return [4, sass_1["default"].compileStringAsync(text, options)];
+                case 2:
+                    result = _a.sent();
+                    renderPost('', destination, result);
+                    return [3, 4];
+                case 3:
+                    options = configs.generateSassOptions(sheetloaf.opts());
+                    result = sass_1["default"].compileString(text, options);
+                    renderPost('', destination, result);
+                    _a.label = 4;
+                case 4: return [3, 6];
+                case 5:
+                    e_2 = _a.sent();
+                    sassErrorCatcher(e_2, destination);
+                    return [3, 6];
+                case 6: return [2];
             }
         });
     });
@@ -319,23 +382,5 @@ function emitSassError(err) {
     var message = err.sassMessage.toString().replace(/'.*'/i, '');
     var css = "\n        body:before { \n            content: 'Error from ".concat(span, "';\n            display: table;\n            background-color:#cc0000;\n            color:white;\n            border-radius:5px;\n            margin-bottom:5px;\n            padding:5px;\n            font-family:sans-serif\n        }\n        body:after { \n            content: \"").concat(message, "\";\n            display: table;\n            background-color:#0e70b0;\n            color:white;\n            border-radius:5px;\n            padding:5px;\n            margin-bottom: 5px;\n            font-family:sans-serif\n        }\n        body * { display: none; }\n    ");
     return css;
-}
-function generatePostcssConfig(configArg, use) {
-    if (configArg === void 0) { configArg = ''; }
-    var obj = {
-        plugins: []
-    };
-    if (use) {
-    }
-    else {
-        var configFileLoc = path_1["default"].resolve(process.cwd(), configArg, 'postcss.config.js');
-        try {
-            fs_1["default"].lstatSync(configFileLoc);
-            obj = require(configFileLoc);
-        }
-        catch (e) {
-        }
-    }
-    return obj;
 }
 //# sourceMappingURL=index.js.map

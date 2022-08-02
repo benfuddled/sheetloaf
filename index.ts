@@ -10,11 +10,13 @@ import fg from 'fast-glob';
 import sass, { Options } from 'sass';
 import postcss from 'postcss';
 
+import * as configs from './configs';
+
 const sheetloaf = new Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
-let postcssConfig = {
+let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
 
@@ -22,30 +24,27 @@ sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
     .action((source: string) => {
-        postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
-        renderAllFiles(source);
-        watch(source);
-        // TODO: reimplement fully
-        // if (source.length > 0) {
-        //     // If source is provided, we ignore pipes.
-        //     //init(source);
-        // } else if (!process.stdin.isTTY) {
-        //     // see github.com/tj/commander.js/issues/137
-        //     let stdin = '';
-        //     process.stdin.on('readable', () => {
-        //         var chunk = process.stdin.read();
-        //         if (chunk !== null) {
-        //             stdin += chunk;
-        //         }
-        //     });
-        //     process.stdin.on('end', () => {
-        //         usingStdin = true;
-        //         //init(stdin);
-        //     });
-        // }
+        postcssConfig = configs.generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+        if (source.length > 0) {
+            // If source is provided, we ignore pipes.
+            renderAllFiles(source);
+            watch(source);
+        } else if (!process.stdin.isTTY) {
+            // see github.com/tj/commander.js/issues/137
+            let stdin = '';
+            process.stdin.on('readable', () => {
+                var chunk = process.stdin.read();
+                if (chunk !== null) {
+                    stdin += chunk;
+                }
+            });
+            process.stdin.on('end', () => {
+                usingStdin = true;
+                renderSassFromStdin(stdin);
+            });
+        }
     });
 
-// TODO: Add option for async
 sheetloaf
     .option('-o, --output <LOCATION>', 'Output file.')
     .option('--dir <LOCATION>', 'Output directory.')
@@ -86,15 +85,7 @@ function renderAllFiles(source: string) {
     expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
-                const destination = buildDestinationPath(
-                    fileName,
-                    sheetloaf.opts().output,
-                    sheetloaf.opts().dir,
-                    sheetloaf.opts().base,
-                    sheetloaf.opts().ext,
-                    usingStdin
-                );
-                renderSass(fileName, destination);
+                renderSass(fileName);
             }
         });
     });
@@ -125,35 +116,48 @@ function watch(source: string) {
     }
 }
 
-async function renderSass(fileName: string, destination: string) {
+async function renderSass(fileName: string) {
+    const destination = buildDestinationPath(
+        fileName,
+        sheetloaf.opts().output,
+        sheetloaf.opts().dir,
+        sheetloaf.opts().base,
+        sheetloaf.opts().ext,
+        usingStdin
+    );
     try {
         if (sheetloaf.opts().async === true) {
-            //TODO
-            // Sass doesn't automatically add a sourceMappingURL comment to the generated CSS. 
-            // It's up to callers to do that, since callers have full knowledge of where the 
-            // CSS and the source map will exist in relation to one another and how they'll be 
-            // served to the browser.
-
-            //TODO
-            // account for stdin
-
-            const options: Options<"async"> = {
-                style: sheetloaf.opts().style,
-                loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
-                sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
-                sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
-            };
+            const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sass.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
         } else {
-            const options: Options<"sync"> = {
-                style: sheetloaf.opts().style,
-                loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
-                sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
-                sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
-            };
+            const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sass.compile(fileName, options);
             renderPost(fileName, destination, result);
+        }
+    } catch (e: any) {
+        sassErrorCatcher(e, destination);
+    }
+}
+
+async function renderSassFromStdin(text: string) {
+    const destination = buildDestinationPath(
+        '',
+        sheetloaf.opts().output,
+        sheetloaf.opts().dir,
+        sheetloaf.opts().base,
+        sheetloaf.opts().ext,
+        usingStdin
+    );
+    try {
+        if (sheetloaf.opts().async === true) {
+            const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
+            const result = await sass.compileStringAsync(text, options);
+            renderPost('', destination, result);
+        } else {
+            const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
+            const result = sass.compileString(text, options);
+            renderPost('', destination, result);
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
@@ -391,30 +395,4 @@ function emitSassError(err: any) {
     `;
 
     return css;
-}
-
-/**
- * Generates an object used for postcss configuration.
- */
-function generatePostcssConfig(configArg: string = '', use: string) {
-    let obj = {
-        plugins: []
-    };
-    // If user specifies --use, we ignore postcss config files.
-    if (use) {
-        // TODO implement this
-        // use.split(',').forEach(function (plugin) {
-        //     obj.plugins.push(require(plugin));
-        // });
-    } else {
-        let configFileLoc: string = path.resolve(process.cwd(), configArg, 'postcss.config.js');
-
-        try {
-            fs.lstatSync(configFileLoc);
-            obj = require(configFileLoc);
-        } catch (e) {
-            // TODO
-        }
-    }
-    return obj;
 }
