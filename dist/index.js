@@ -148,7 +148,6 @@ function renderPost(fileName, destination, sassResult) {
         map: postcssMapOptions
     })
         .then(function (postedResult) {
-        console.log(postedResult);
         postedResult.warnings().forEach(function (warn) {
             process.stderr.write(warn.toString());
         });
@@ -292,7 +291,9 @@ function sassErrorCatcher(e, destination) {
     }
 }
 function emitSassError(err) {
-    var css = "body:before { content: 'Error at: ".concat(err.span, "';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '").concat(err.sassMessage, "';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }");
+    var span = err.span.toString().replace(/'.*'/i, '');
+    var message = err.sassMessage.toString().replace(/'.*'/i, '');
+    var css = "\n        body:before { \n            content: 'Error from ".concat(span, "';\n            display: table;\n            background-color:#cc0000;\n            color:white;\n            border-radius:5px;\n            margin-bottom:5px;\n            padding:5px;\n            font-family:sans-serif\n        }\n        body:after { \n            content: \"").concat(message, "\";\n            display: table;\n            background-color:#0e70b0;\n            color:white;\n            border-radius:5px;\n            padding:5px;\n            margin-bottom: 5px;\n            font-family:sans-serif\n        }\n        body * { display: none; }\n    ");
     return css;
 }
 function generatePostcssConfig(configArg, use) {

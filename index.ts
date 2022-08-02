@@ -159,7 +159,6 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
     if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
         postcssMapOptions = false;
     }
-    //console.log(postcssMapOptions);
     postcss(postcssConfig.plugins)
         .process(sassResult.css.toString(), {
             from: fileName,
@@ -167,7 +166,7 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
             map: postcssMapOptions
         })
         .then((postedResult) => {
-            console.log(postedResult);
+            //console.log(postedResult);
             postedResult.warnings().forEach((warn) => {
                 process.stderr.write(warn.toString());
             });
@@ -351,7 +350,32 @@ function sassErrorCatcher(e: any, destination: string) {
  * @param {*} err
  */
 function emitSassError(err: any) {
-    let css = `body:before { content: 'Error at: ${err.span}';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '${err.sassMessage}';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }`;
+    // Remove quotes
+    const span = err.span.toString().replace(/'.*'/i, '');
+    const message = err.sassMessage.toString().replace(/'.*'/i, '');
+    let css = `
+        body:before { 
+            content: 'Error from ${span}';
+            display: table;
+            background-color:#cc0000;
+            color:white;
+            border-radius:5px;
+            margin-bottom:5px;
+            padding:5px;
+            font-family:sans-serif
+        }
+        body:after { 
+            content: "${message}";
+            display: table;
+            background-color:#0e70b0;
+            color:white;
+            border-radius:5px;
+            padding:5px;
+            margin-bottom: 5px;
+            font-family:sans-serif
+        }
+        body * { display: none; }
+    `;
 
     return css;
 }
