@@ -225,7 +225,7 @@ function renderPost(fileName, destination, sassResult) {
         absolute: sheetloaf.opts().sourceMapUrls === 'absolute' ? true : false,
         sourcesContent: sheetloaf.opts().embedSources === true ? true : false
     };
-    if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
+    if (usingStdin === true || sheetloaf.opts().sourceMap === false) {
         postcssMapOptions = false;
     }
     (0, postcss_1["default"])(postcssConfig.plugins)

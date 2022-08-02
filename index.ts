@@ -174,7 +174,7 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
         sourcesContent: sheetloaf.opts().embedSources === true ? true : false,
     };
 
-    if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
+    if (usingStdin === true || sheetloaf.opts().sourceMap === false) {
         postcssMapOptions = false;
     }
     postcss(postcssConfig.plugins)
@@ -222,32 +222,6 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
             }
         });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Given an array of input sources, expand any globs and validate that inputs exist.
