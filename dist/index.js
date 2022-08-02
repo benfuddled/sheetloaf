@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var commander_1 = require("commander");
+var chokidar_1 = __importDefault(require("chokidar"));
 var picocolors_1 = __importDefault(require("picocolors"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
@@ -58,7 +59,9 @@ sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
     .action(function (source) {
-    main(source);
+    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+    renderAllFiles(source);
+    watch(source);
 });
 sheetloaf
     .option('-o, --output <LOCATION>', 'Output file.')
@@ -80,8 +83,7 @@ sheetloaf
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
     .option('--async', "Use sass' asynchronous API. This may be slower.");
 sheetloaf.parse(process.argv);
-function main(source) {
-    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+function renderAllFiles(source) {
     expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path_1["default"].basename(fileName).charAt(0) !== '_') {
@@ -90,6 +92,28 @@ function main(source) {
             }
         });
     });
+}
+function watch(source) {
+    if (sheetloaf.opts().watch === true) {
+        chokidar_1["default"]
+            .watch(source[0].split(','), {
+            usePolling: sheetloaf.opts().poll !== undefined,
+            interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
+            ignoreInitial: true,
+            awaitWriteFinish: {
+                stabilityThreshold: 1500,
+                pollInterval: 100
+            }
+        })
+            .on('change', function (changed) {
+            console.log("File changed: ".concat(changed));
+            renderAllFiles(source);
+        })
+            .on('add', function (added) {
+            console.log("File added: ".concat(added));
+            renderAllFiles(source);
+        });
+    }
 }
 function renderSass(fileName, destination) {
     return __awaiter(this, void 0, void 0, function () {

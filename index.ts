@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
@@ -21,8 +22,9 @@ sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
     .action((source: string) => {
-        //console.log(source);
-        main(source);
+        postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+        renderAllFiles(source);
+        watch(source);
         // TODO: reimplement fully
         // if (source.length > 0) {
         //     // If source is provided, we ignore pipes.
@@ -80,10 +82,8 @@ sheetloaf
 
 sheetloaf.parse(process.argv);
 
-function main(source: string) {
-    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+function renderAllFiles(source: string) {
     expandGlob(source[0].split(','), function (entries) {
-        //console.log(entries);
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
                 const destination = buildDestinationPath(
@@ -98,17 +98,31 @@ function main(source: string) {
             }
         });
     });
+}
 
+function watch(source: string) {
+    if (sheetloaf.opts().watch === true) {
+        chokidar
+            .watch(source[0].split(','), {
+                usePolling: sheetloaf.opts().poll !== undefined,
+                interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
+                ignoreInitial: true,
+                awaitWriteFinish: {
+                    stabilityThreshold: 1500,
+                    pollInterval: 100
+                }
+            })
+            .on('change', (changed) => {
+                console.log(`File changed: ${changed}`);
 
+                renderAllFiles(source);
+            })
+            .on('add', (added) => {
+                console.log(`File added: ${added}`);
 
-    // if (sheetloaf.opts().async === true) {
-    //     console.log('rendering async...');
-    //     const result = await sass.compileAsync(source[0]);
-    //     console.log(result.css);
-    // } else {
-    //     console.log('rendering sync...');
-    //     console.log(sass.compile(source[0]).css);
-    // }
+                renderAllFiles(source);
+            });
+    }
 }
 
 async function renderSass(fileName: string, destination: string) {
@@ -166,7 +180,6 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
             map: postcssMapOptions
         })
         .then((postedResult) => {
-            //console.log(postedResult);
             postedResult.warnings().forEach((warn) => {
                 process.stderr.write(warn.toString());
             });
