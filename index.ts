@@ -11,6 +11,7 @@ import sass, { Options } from 'sass';
 import postcss from 'postcss';
 
 import * as configs from './configs';
+import * as fileFinder from './fileFinder';
 
 const sheetloaf = new Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
@@ -82,7 +83,7 @@ sheetloaf
 sheetloaf.parse(process.argv);
 
 function renderAllFiles(source: string) {
-    expandGlob(source[0].split(','), function (entries) {
+    fileFinder.expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
                 renderSass(fileName);
@@ -117,7 +118,7 @@ function watch(source: string) {
 }
 
 async function renderSass(fileName: string) {
-    const destination = buildDestinationPath(
+    const destination = fileFinder.buildDestinationPath(
         fileName,
         sheetloaf.opts().output,
         sheetloaf.opts().dir,
@@ -141,7 +142,7 @@ async function renderSass(fileName: string) {
 }
 
 async function renderSassFromStdin(text: string) {
-    const destination = buildDestinationPath(
+    const destination = fileFinder.buildDestinationPath(
         '',
         sheetloaf.opts().output,
         sheetloaf.opts().dir,
@@ -221,90 +222,6 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 process.stderr.write(err);
             }
         });
-}
-
-/**
- * Given an array of input sources, expand any globs and validate that inputs exist.
- *
- */
-function expandGlob(input: string[], callback: (expanded: string[]) => void) {
-    let expanded: string[] = [];
-    let index: number = 0;
-
-    for (let i = 0; i < input.length; i++) {
-        let isGlob = false;
-        let isDir = false;
-        let isFile = false;
-
-        isGlob = picomatch.scan(input[index]).isGlob;
-        if (isGlob === false) {
-            try {
-                isDir = fs.lstatSync(path.normalize(input[index])).isDirectory();
-                isFile = fs.lstatSync(path.normalize(input[index])).isFile();
-            } catch (err) {
-                throw err;
-            }
-        }
-
-        if (isGlob || isFile) {
-            let files = fg
-                .sync(input[index], {
-                    dot: true
-                })
-                .map((entry) => path.normalize(entry));
-            expanded.push(...files);
-        } else if (isDir) {
-            let dir = input[index];
-
-            fs.readdir(dir, (err, files) => {
-                if (err) {
-                    throw err;
-                } else {
-                    files.forEach((file) => {
-                        let fullname = path.join(dir, file);
-                        if (!fs.lstatSync(fullname).isDirectory()) {
-                            expanded.push(fullname);
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    callback(expanded);
-}
-
-
-// TODO: returning a blank string seems super messy, this could use a refactor.
-/**
- *
- * @param filename
- * @returns path, or a blank string if the combination of options provided does not give a valid path.
- */
-function buildDestinationPath(fileName: string, outFile: string = '', dir: string = '', base: string = '', extension: string = '.css', usingStdin: boolean) {
-    let destination: string = '';
-    let mirror: string = '';
-
-    if (usingStdin === true) {
-        if (outFile.length > 0) {
-            destination = outFile;
-        } else {
-            destination = '';
-        }
-    } else {
-        if (dir.length > 0) {
-            if (base.length > 0) {
-                mirror = path.dirname(fileName.replace(path.join(base, '/'), ''));
-            }
-            destination = path.join(dir, mirror, path.basename(fileName, path.extname(fileName)) + extension);
-        } else if (outFile.length > 0) {
-            destination = outFile;
-        } else {
-            destination = '';
-        }
-    }
-
-    return destination;
 }
 
 function sassErrorCatcher(e: any, destination: string) {

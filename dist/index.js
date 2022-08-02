@@ -68,11 +68,10 @@ var chokidar_1 = __importDefault(require("chokidar"));
 var picocolors_1 = __importDefault(require("picocolors"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var picomatch_1 = __importDefault(require("picomatch"));
-var fast_glob_1 = __importDefault(require("fast-glob"));
 var sass_1 = __importDefault(require("sass"));
 var postcss_1 = __importDefault(require("postcss"));
 var configs = __importStar(require("./configs"));
+var fileFinder = __importStar(require("./fileFinder"));
 var sheetloaf = new commander_1.Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 var usingStdin = false;
@@ -123,7 +122,7 @@ sheetloaf
     .option('--async', "Use sass' asynchronous API. This may be slower.");
 sheetloaf.parse(process.argv);
 function renderAllFiles(source) {
-    expandGlob(source[0].split(','), function (entries) {
+    fileFinder.expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path_1["default"].basename(fileName).charAt(0) !== '_') {
                 renderSass(fileName);
@@ -159,7 +158,7 @@ function renderSass(fileName) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    destination = buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+                    destination = fileFinder.buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
@@ -191,7 +190,7 @@ function renderSassFromStdin(text) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    destination = buildDestinationPath('', sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+                    destination = fileFinder.buildDestinationPath('', sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
@@ -271,84 +270,6 @@ function renderPost(fileName, destination, sassResult) {
             process.stderr.write(err);
         }
     });
-}
-function expandGlob(input, callback) {
-    var expanded = [];
-    var index = 0;
-    var _loop_1 = function (i) {
-        var isGlob = false;
-        var isDir = false;
-        var isFile = false;
-        isGlob = picomatch_1["default"].scan(input[index]).isGlob;
-        if (isGlob === false) {
-            try {
-                isDir = fs_1["default"].lstatSync(path_1["default"].normalize(input[index])).isDirectory();
-                isFile = fs_1["default"].lstatSync(path_1["default"].normalize(input[index])).isFile();
-            }
-            catch (err) {
-                throw err;
-            }
-        }
-        if (isGlob || isFile) {
-            var files = fast_glob_1["default"]
-                .sync(input[index], {
-                dot: true
-            })
-                .map(function (entry) { return path_1["default"].normalize(entry); });
-            expanded.push.apply(expanded, files);
-        }
-        else if (isDir) {
-            var dir_1 = input[index];
-            fs_1["default"].readdir(dir_1, function (err, files) {
-                if (err) {
-                    throw err;
-                }
-                else {
-                    files.forEach(function (file) {
-                        var fullname = path_1["default"].join(dir_1, file);
-                        if (!fs_1["default"].lstatSync(fullname).isDirectory()) {
-                            expanded.push(fullname);
-                        }
-                    });
-                }
-            });
-        }
-    };
-    for (var i = 0; i < input.length; i++) {
-        _loop_1(i);
-    }
-    callback(expanded);
-}
-function buildDestinationPath(fileName, outFile, dir, base, extension, usingStdin) {
-    if (outFile === void 0) { outFile = ''; }
-    if (dir === void 0) { dir = ''; }
-    if (base === void 0) { base = ''; }
-    if (extension === void 0) { extension = '.css'; }
-    var destination = '';
-    var mirror = '';
-    if (usingStdin === true) {
-        if (outFile.length > 0) {
-            destination = outFile;
-        }
-        else {
-            destination = '';
-        }
-    }
-    else {
-        if (dir.length > 0) {
-            if (base.length > 0) {
-                mirror = path_1["default"].dirname(fileName.replace(path_1["default"].join(base, '/'), ''));
-            }
-            destination = path_1["default"].join(dir, mirror, path_1["default"].basename(fileName, path_1["default"].extname(fileName)) + extension);
-        }
-        else if (outFile.length > 0) {
-            destination = outFile;
-        }
-        else {
-            destination = '';
-        }
-    }
-    return destination;
 }
 function sassErrorCatcher(e, destination) {
     if (destination !== '') {
