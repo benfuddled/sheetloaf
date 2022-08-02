@@ -1,2 +1,134 @@
 #!/usr/bin/env node
-const chokidar=require("chokidar"),color=require("picocolors"),{Command}=require("commander"),fs=require("fs"),path=require("path"),postcss=require("postcss"),sass=require("sass"),parser=require("./parser"),ver=require("../package.json").version,sheetloaf=new Command;let postcssConfig={plugins:[]},usingStdin=!1;sheetloaf.version(ver,"-v, --version","Print the version of Sheetloaf."),sheetloaf.arguments("[sources...]").description("\u{1F4C3}\u{1F35E} Compile Sass to CSS and transform the output using PostCSS all in one command.").action(o=>{if(o.length>0)init(o);else if(!process.stdin.isTTY){let e="";process.stdin.on("readable",function(){var t=this.read();t!==null&&(e+=t)}),process.stdin.on("end",function(){usingStdin=!0,init(e)})}}),sheetloaf.option("-o, --output <LOCATION>","Output file.").option("--dir <LOCATION>","Output directory.").option("--base <DIR>","Mirror the directory structure relative to this path in the output directory, for use with --dir.","").option("--ext <EXTENSION>","Override the output file extension; for use with --dir",".css").option("-s, --style <NAME>",'Output style. ["expanded", "compressed"]',"expanded").option("--source-map","Generate a source map (this is the default option).").option("--no-source-map","Do not generate a source map.").option("--embed-source-map","Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.").option("--embed-sources","Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.").option("--source-map-urls <TYPE>",'Controls how the source maps that Sass generates link back to the Sass files  that contributed to the generated CSS. ["relative", "absolute"]',"relative").option("--error-css","Emit a CSS file when an error occurs during compilation (this is the default option).").option("--no-error-css","Do not emit a CSS file when an error occurs during compilation.").option("-I, --load-path <PATHS>","Adds an additional load path for Sass to look for stylesheets.").option("-w, --watch","Watch stylesheets and recompile when they change.").option("--config <LOCATION>","Set a custom directory to look for a postcss config file.").option("--poll [DURATION]","Use polling for file watching. Can optionally pass polling interval; default 100 ms").option("-u, --use <PLUGINS>","List of postcss plugins to use. Will cause sheetloaf to ignore any config files."),sheetloaf.parse(process.argv);function init(o){postcssConfig=parser.generatePostcssConfig(sheetloaf.opts().config,sheetloaf.opts().use),usingStdin===!0?render(o):(parser.expandGlob(o[0].split(","),function(e){e.forEach(function(t){path.basename(t).charAt(0)!=="_"&&render(t)})}),watch(o))}function watch(o){sheetloaf.opts().watch===!0&&chokidar.watch(o[0].split(","),{usePolling:sheetloaf.opts().poll!==void 0,interval:typeof sheetloaf.opts().poll=="number"?sheetloaf.opts().poll:100,ignoreInitial:!0,awaitWriteFinish:{stabilityThreshold:1500,pollInterval:100}}).on("change",e=>{console.log(`File changed: ${e}`),parser.expandGlob(o[0].split(","),function(t){t.forEach(function(i){path.basename(i).charAt(0)!=="_"&&render(i)})})}).on("add",e=>{console.log(`File added: ${e}`),parser.expandGlob(o[0].split(","),function(t){t.forEach(function(i){path.basename(i).charAt(0)!=="_"&&render(i)})})})}function render(o){usingStdin===!1&&console.log(`Rendering ${o}...`);let e=parser.createDestination(o,sheetloaf.opts().output,sheetloaf.opts().dir,sheetloaf.opts().base,sheetloaf.opts().ext,usingStdin),t=generateSassOptions(o,e),i={inline:sheetloaf.opts().embedSourceMap===!0,absolute:sheetloaf.opts().sourceMapUrls==="absolute",sourcesContent:sheetloaf.opts().embedSources===!0};usingStdin===!1&&sheetloaf.opts().sourceMap===!1&&(i=!1);try{let n=sass.renderSync(t);postcss(postcssConfig.plugins).process(n.css.toString(),{from:n.stats.entry,to:e,map:i}).then(s=>{if(s.warnings().forEach(r=>{process.stderr.write(r.toString())}),e!==""){try{fs.mkdirSync(path.dirname(e),{recursive:!0})}catch(r){if(r.code!=="EEXIST"||r.code!=="EISDIR")throw r}fs.writeFile(e,s.css,r=>{if(r)throw r;console.log(color.green(`Successfully written to ${e}`))}),s.map&&fs.writeFile(e+".map",s.map.toString(),r=>{if(r)throw r})}else process.stdout.write(s.css)}).catch(s=>{e!==""?console.log(color.red(s)):process.stderr.write(s)})}catch(n){if(e!==""){console.log(color.red(n.formatted));try{fs.mkdirSync(path.dirname(e),{recursive:!0})}catch(s){if(s.code!=="EEXIST"||s.code!=="EISDIR")throw s}sheetloaf.opts().errorCss!==!1&&fs.writeFile(e,emitSassError(n),s=>{if(s)throw s;console.log(color.yellow(`Emitted error to ${e}`))})}else process.stderr.write(n.formatted);!sheetloaf.opts().watch&&(process.exitCode==null||process.exitCode===0)&&(process.exitCode=1)}}function generateSassOptions(o,e){let t={outFile:e,outputStyle:sheetloaf.opts().style,includePaths:sheetloaf.opts().loadPath?sheetloaf.opts().loadPath.split(","):[]};return usingStdin===!0?(t.data=o,t.sourceMap=!1,t.sourceMapContents=!1,t.sourceMapEmbed=!1):(t.file=o,t.sourceMap=sheetloaf.opts().sourceMap!==!1,t.sourceMapContents=sheetloaf.opts().sourceMap!==!1,t.sourceMapEmbed=sheetloaf.opts().sourceMap!==!1),t}function emitSassError(o){let e=o.formatted.substr(0,o.formatted.indexOf("^")).replace(/(\r\n|\n|\r)/gm," ").replace(/'/,"").replace(/╷.*?│/,"").replace(/│/,"").replace("'","").replace("'",""),t=o.file.replace(/\\/g,"/");return`body:before { content: 'Line ${o.line}: ${e}';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '${t}';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }`}
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+exports.__esModule = true;
+var commander_1 = require("commander");
+var fs_1 = __importDefault(require("fs"));
+var path_1 = __importDefault(require("path"));
+var picomatch_1 = __importDefault(require("picomatch"));
+var fast_glob_1 = __importDefault(require("fast-glob"));
+var sheetloaf = new commander_1.Command();
+sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
+var usingStdin = false;
+sheetloaf
+    .arguments('[sources...]')
+    .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
+    .action(function (source) {
+    main(source);
+});
+sheetloaf
+    .option('-o, --output <LOCATION>', 'Output file.')
+    .option('--dir <LOCATION>', 'Output directory.')
+    .option('--base <DIR>', 'Mirror the directory structure relative to this path in the output directory, for use with --dir.', '')
+    .option('--ext <EXTENSION>', 'Override the output file extension; for use with --dir', '.css')
+    .option('-s, --style <NAME>', 'Output style. ["expanded", "compressed"]', 'expanded')
+    .option('--source-map', 'Generate a source map (this is the default option).')
+    .option('--no-source-map', 'Do not generate a source map.')
+    .option('--embed-source-map', 'Embed the contents of the source map file in the generated CSS, rather than creating a separate file and linking to it from the CSS.')
+    .option('--embed-sources', 'Embed the entire contents of the Sass files that contributed to the generated CSS in the source map.')
+    .option('--source-map-urls <TYPE>', 'Controls how the source maps that Sass generates link back to the Sass files  that contributed to the generated CSS. ["relative", "absolute"]', 'relative')
+    .option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
+    .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
+    .option('-I, --load-path <PATHS>', 'Adds an additional load path for Sass to look for stylesheets.')
+    .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
+    .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
+    .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
+    .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
+    .option('--async', "Use sass' asynchronous API. This may be slower.");
+sheetloaf.parse(process.argv);
+function main(source) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            expandGlob(source[0].split(','), function (entries) {
+                console.log(entries);
+            });
+            return [2];
+        });
+    });
+}
+function expandGlob(input, callback) {
+    var expanded = [];
+    var index = 0;
+    var _loop_1 = function (i) {
+        var isGlob = false;
+        var isDir = false;
+        var isFile = false;
+        isGlob = picomatch_1["default"].scan(input[index]).isGlob;
+        if (isGlob === false) {
+            try {
+                isDir = fs_1["default"].lstatSync(path_1["default"].normalize(input[index])).isDirectory();
+                isFile = fs_1["default"].lstatSync(path_1["default"].normalize(input[index])).isFile();
+            }
+            catch (err) {
+                throw err;
+            }
+        }
+        if (isGlob || isFile) {
+            var files = fast_glob_1["default"]
+                .sync(input[index], {
+                dot: true
+            })
+                .map(function (entry) { return path_1["default"].normalize(entry); });
+            expanded.push.apply(expanded, files);
+        }
+        else if (isDir) {
+            var dir_1 = input[index];
+            fs_1["default"].readdir(dir_1, function (err, files) {
+                if (err) {
+                    throw err;
+                }
+                else {
+                    files.forEach(function (file) {
+                        var fullname = path_1["default"].join(dir_1, file);
+                        if (!fs_1["default"].lstatSync(fullname).isDirectory()) {
+                            expanded.push(fullname);
+                        }
+                    });
+                }
+            });
+        }
+    };
+    for (var i = 0; i < input.length; i++) {
+        _loop_1(i);
+    }
+    callback(expanded);
+}
+//# sourceMappingURL=index.js.map
