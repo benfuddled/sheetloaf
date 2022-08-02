@@ -45,6 +45,7 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var picomatch_1 = __importDefault(require("picomatch"));
 var fast_glob_1 = __importDefault(require("fast-glob"));
+var sass_1 = __importDefault(require("sass"));
 var sheetloaf = new commander_1.Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 var usingStdin = false;
@@ -75,14 +76,55 @@ sheetloaf
     .option('--async', "Use sass' asynchronous API. This may be slower.");
 sheetloaf.parse(process.argv);
 function main(source) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            expandGlob(source[0].split(','), function (entries) {
-                console.log(entries);
-            });
-            return [2];
+    expandGlob(source[0].split(','), function (entries) {
+        console.log(entries);
+        entries.forEach(function (fileName) {
+            if (path_1["default"].basename(fileName).charAt(0) !== '_') {
+                renderSass(fileName);
+            }
         });
     });
+}
+function renderSass(fileName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var options, result, options, result, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    if (!(sheetloaf.opts().async === true)) return [3, 2];
+                    options = {
+                        style: sheetloaf.opts().style,
+                        loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
+                        sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
+                        sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
+                    };
+                    return [4, sass_1["default"].compileAsync(fileName, options)];
+                case 1:
+                    result = _a.sent();
+                    console.log(result.css);
+                    return [3, 3];
+                case 2:
+                    options = {
+                        style: sheetloaf.opts().style,
+                        loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
+                        sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
+                        sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
+                    };
+                    result = sass_1["default"].compile(fileName, options);
+                    console.log(result.css);
+                    _a.label = 3;
+                case 3: return [3, 5];
+                case 4:
+                    e_1 = _a.sent();
+                    console.log(e_1);
+                    return [3, 5];
+                case 5: return [2];
+            }
+        });
+    });
+}
+function renderPost(result) {
 }
 function expandGlob(input, callback) {
     var expanded = [];
@@ -130,5 +172,40 @@ function expandGlob(input, callback) {
         _loop_1(i);
     }
     callback(expanded);
+}
+function createDestination(fileName, outFile, dir, base, extension, usingStdin) {
+    var result = '';
+    var mirror = '';
+    if (!outFile)
+        outFile = '';
+    if (!extension)
+        extension = '.css';
+    if (usingStdin === true) {
+        if (outFile.length > 0) {
+            result = outFile;
+        }
+        else {
+            result = '';
+        }
+    }
+    else {
+        if (!dir)
+            dir = '';
+        if (!base)
+            base = '';
+        if (dir.length > 0) {
+            if (base.length > 0) {
+                mirror = path_1["default"].dirname(fileName.replace(path_1["default"].join(base, '/'), ''));
+            }
+            result = path_1["default"].join(dir, mirror, path_1["default"].basename(fileName, path_1["default"].extname(fileName)) + extension);
+        }
+        else if (outFile.length > 0) {
+            result = outFile;
+        }
+        else {
+            result = '';
+        }
+    }
+    return result;
 }
 //# sourceMappingURL=index.js.map

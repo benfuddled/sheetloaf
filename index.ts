@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import picomatch from 'picomatch';
 import fg from 'fast-glob';
-import sass from 'sass';
+import sass, { Options } from 'sass';
 
 const sheetloaf = new Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
@@ -75,14 +75,14 @@ sheetloaf
 
 sheetloaf.parse(process.argv);
 
-async function main(source: string) {
+function main(source: string) {
     expandGlob(source[0].split(','), function (entries) {
         console.log(entries);
-        // entries.forEach(function (filename) {
-        //     if (path.basename(filename).charAt(0) !== '_') {
-        //         //render(filename);
-        //     }
-        // });
+        entries.forEach(function (fileName) {
+            if (path.basename(fileName).charAt(0) !== '_') {
+                renderSass(fileName);
+            }
+        });
     });
 
 
@@ -97,10 +97,70 @@ async function main(source: string) {
     // }
 }
 
+async function renderSass(fileName: string) {
+    try {
+        if (sheetloaf.opts().async === true) {
+            //TODO
+            // Sass doesn't automatically add a sourceMappingURL comment to the generated CSS. 
+            // It's up to callers to do that, since callers have full knowledge of where the 
+            // CSS and the source map will exist in relation to one another and how they'll be 
+            // served to the browser.
+
+            //TODO
+            // account for stdin
+
+            const options: Options<"async"> = {
+                style: sheetloaf.opts().style,
+                loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
+                sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
+                sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
+            };
+            const result = await sass.compileAsync(fileName, options);
+            console.log(result.css);
+        } else {
+            const options: Options<"sync"> = {
+                style: sheetloaf.opts().style,
+                loadPaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : [],
+                sourceMap: sheetloaf.opts().sourceMap === false ? false : true,
+                sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
+            };
+            const result = sass.compile(fileName, options);
+            console.log(result.css);
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function renderPost(result: any) {
+
+}
 
 
 
 
+
+// function generateSassOptions(source, destination) => string {
+//     let obj = {
+//         outFile: destination,
+//         outputStyle: sheetloaf.opts().style,
+//         includePaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : []
+//     };
+
+//     if (usingStdin === true) {
+//         obj.data = source;
+//         obj.sourceMap = false;
+//         obj.sourceMapContents = false;
+//         obj.sourceMapEmbed = false;
+//     } else {
+//         obj.file = source;
+//         obj.sourceMap = sheetloaf.opts().sourceMap === false ? false : true;
+//         obj.sourceMapContents = sheetloaf.opts().sourceMap === false ? false : true;
+//         obj.sourceMapEmbed = sheetloaf.opts().sourceMap === false ? false : true;
+//     }
+
+//     return "hello";
+// }
 
 
 
@@ -177,4 +237,38 @@ function expandGlob(input: string[], callback: (expanded: string[]) => void) {
     }
 
     callback(expanded);
+}
+
+
+// TODO: returning a blank string seems super messy, this could use a refactor.
+function createDestination(fileName: string, outFile: string, dir: string, base: string, extension: string, usingStdin: boolean) {
+    let result = '';
+    let mirror = '';
+
+    if (!outFile) outFile = '';
+    if (!extension) extension = '.css';
+
+    if (usingStdin === true) {
+        if (outFile.length > 0) {
+            result = outFile;
+        } else {
+            result = '';
+        }
+    } else {
+        if (!dir) dir = '';
+        if (!base) base = '';
+
+        if (dir.length > 0) {
+            if (base.length > 0) {
+                mirror = path.dirname(fileName.replace(path.join(base, '/'), ''));
+            }
+            result = path.join(dir, mirror, path.basename(fileName, path.extname(fileName)) + extension);
+        } else if (outFile.length > 0) {
+            result = outFile;
+        } else {
+            result = '';
+        }
+    }
+
+    return result;
 }
