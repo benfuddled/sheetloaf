@@ -41,14 +41,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var commander_1 = require("commander");
+var picocolors_1 = __importDefault(require("picocolors"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var picomatch_1 = __importDefault(require("picomatch"));
 var fast_glob_1 = __importDefault(require("fast-glob"));
 var sass_1 = __importDefault(require("sass"));
+var postcss_1 = __importDefault(require("postcss"));
 var sheetloaf = new commander_1.Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 var usingStdin = false;
+var postcssConfig = {
+    plugins: []
+};
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
@@ -76,16 +81,17 @@ sheetloaf
     .option('--async', "Use sass' asynchronous API. This may be slower.");
 sheetloaf.parse(process.argv);
 function main(source) {
+    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
     expandGlob(source[0].split(','), function (entries) {
-        console.log(entries);
         entries.forEach(function (fileName) {
             if (path_1["default"].basename(fileName).charAt(0) !== '_') {
-                renderSass(fileName);
+                var destination = buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+                renderSass(fileName, destination);
             }
         });
     });
 }
-function renderSass(fileName) {
+function renderSass(fileName, destination) {
     return __awaiter(this, void 0, void 0, function () {
         var options, result, options, result, e_1;
         return __generator(this, function (_a) {
@@ -102,7 +108,7 @@ function renderSass(fileName) {
                     return [4, sass_1["default"].compileAsync(fileName, options)];
                 case 1:
                     result = _a.sent();
-                    console.log(result.css);
+                    renderPost(fileName, destination, result);
                     return [3, 3];
                 case 2:
                     options = {
@@ -112,19 +118,73 @@ function renderSass(fileName) {
                         sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
                     };
                     result = sass_1["default"].compile(fileName, options);
-                    console.log(result.css);
+                    renderPost(fileName, destination, result);
                     _a.label = 3;
                 case 3: return [3, 5];
                 case 4:
                     e_1 = _a.sent();
-                    console.log(e_1);
+                    sassErrorCatcher(e_1, destination);
                     return [3, 5];
                 case 5: return [2];
             }
         });
     });
 }
-function renderPost(result) {
+function renderPost(fileName, destination, sassResult) {
+    var postcssMapOptions = {
+        annotation: true,
+        prev: sassResult.sourceMap,
+        inline: sheetloaf.opts().embedSourceMap === true ? true : false,
+        absolute: sheetloaf.opts().sourceMapUrls === 'absolute' ? true : false,
+        sourcesContent: sheetloaf.opts().embedSources === true ? true : false
+    };
+    if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
+        postcssMapOptions = false;
+    }
+    (0, postcss_1["default"])(postcssConfig.plugins)
+        .process(sassResult.css.toString(), {
+        from: fileName,
+        to: destination,
+        map: postcssMapOptions
+    })
+        .then(function (postedResult) {
+        console.log(postedResult);
+        postedResult.warnings().forEach(function (warn) {
+            process.stderr.write(warn.toString());
+        });
+        if (destination !== '') {
+            try {
+                fs_1["default"].mkdirSync(path_1["default"].dirname(destination), {
+                    recursive: true
+                });
+            }
+            catch (err) {
+                if (err.code !== 'EEXIST' || err.code !== 'EISDIR')
+                    throw err;
+            }
+            fs_1["default"].writeFile(destination, postedResult.css, function (err) {
+                if (err)
+                    throw err;
+                console.log(picocolors_1["default"].green("Successfully written to ".concat(destination)));
+            });
+            if (postedResult.map) {
+                fs_1["default"].writeFile(destination + '.map', postedResult.map.toString(), function (err) {
+                    if (err)
+                        throw err;
+                });
+            }
+        }
+        else {
+            process.stdout.write(postedResult.css);
+        }
+    })["catch"](function (err) {
+        if (destination !== '') {
+            console.log(picocolors_1["default"].red(err));
+        }
+        else {
+            process.stderr.write(err);
+        }
+    });
 }
 function expandGlob(input, callback) {
     var expanded = [];
@@ -173,39 +233,84 @@ function expandGlob(input, callback) {
     }
     callback(expanded);
 }
-function createDestination(fileName, outFile, dir, base, extension, usingStdin) {
-    var result = '';
+function buildDestinationPath(fileName, outFile, dir, base, extension, usingStdin) {
+    if (outFile === void 0) { outFile = ''; }
+    if (dir === void 0) { dir = ''; }
+    if (base === void 0) { base = ''; }
+    if (extension === void 0) { extension = '.css'; }
+    var destination = '';
     var mirror = '';
-    if (!outFile)
-        outFile = '';
-    if (!extension)
-        extension = '.css';
     if (usingStdin === true) {
         if (outFile.length > 0) {
-            result = outFile;
+            destination = outFile;
         }
         else {
-            result = '';
+            destination = '';
         }
     }
     else {
-        if (!dir)
-            dir = '';
-        if (!base)
-            base = '';
         if (dir.length > 0) {
             if (base.length > 0) {
                 mirror = path_1["default"].dirname(fileName.replace(path_1["default"].join(base, '/'), ''));
             }
-            result = path_1["default"].join(dir, mirror, path_1["default"].basename(fileName, path_1["default"].extname(fileName)) + extension);
+            destination = path_1["default"].join(dir, mirror, path_1["default"].basename(fileName, path_1["default"].extname(fileName)) + extension);
         }
         else if (outFile.length > 0) {
-            result = outFile;
+            destination = outFile;
         }
         else {
-            result = '';
+            destination = '';
         }
     }
-    return result;
+    return destination;
+}
+function sassErrorCatcher(e, destination) {
+    if (destination !== '') {
+        console.log(e.message);
+        try {
+            fs_1["default"].mkdirSync(path_1["default"].dirname(destination), {
+                recursive: true
+            });
+        }
+        catch (mkDirErr) {
+            if (mkDirErr.code !== 'EEXIST' || mkDirErr.code !== 'EISDIR')
+                throw mkDirErr;
+        }
+        if (sheetloaf.opts().errorCss !== false) {
+            fs_1["default"].writeFile(destination, emitSassError(e), function (writeFileErr) {
+                if (writeFileErr)
+                    throw writeFileErr;
+                console.log(picocolors_1["default"].yellow("Emitted error to ".concat(destination)));
+            });
+        }
+    }
+    else {
+        process.stderr.write(e.message);
+    }
+    if (!sheetloaf.opts().watch && (process.exitCode == null || process.exitCode === 0)) {
+        process.exitCode = 1;
+    }
+}
+function emitSassError(err) {
+    var css = "body:before { content: 'Error at: ".concat(err.span, "';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '").concat(err.sassMessage, "';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }");
+    return css;
+}
+function generatePostcssConfig(configArg, use) {
+    if (configArg === void 0) { configArg = ''; }
+    var obj = {
+        plugins: []
+    };
+    if (use) {
+    }
+    else {
+        var configFileLoc = path_1["default"].resolve(process.cwd(), configArg, 'postcss.config.js');
+        try {
+            fs_1["default"].lstatSync(configFileLoc);
+            obj = require(configFileLoc);
+        }
+        catch (e) {
+        }
+    }
+    return obj;
 }
 //# sourceMappingURL=index.js.map

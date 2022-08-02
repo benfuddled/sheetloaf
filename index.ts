@@ -1,16 +1,21 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
 import picomatch from 'picomatch';
 import fg from 'fast-glob';
 import sass, { Options } from 'sass';
+import postcss from 'postcss';
 
 const sheetloaf = new Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
+let postcssConfig = {
+    plugins: []
+};
 
 sheetloaf
     .arguments('[sources...]')
@@ -76,11 +81,20 @@ sheetloaf
 sheetloaf.parse(process.argv);
 
 function main(source: string) {
+    postcssConfig = generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
     expandGlob(source[0].split(','), function (entries) {
-        console.log(entries);
+        //console.log(entries);
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
-                renderSass(fileName);
+                const destination = buildDestinationPath(
+                    fileName,
+                    sheetloaf.opts().output,
+                    sheetloaf.opts().dir,
+                    sheetloaf.opts().base,
+                    sheetloaf.opts().ext,
+                    usingStdin
+                );
+                renderSass(fileName, destination);
             }
         });
     });
@@ -97,7 +111,7 @@ function main(source: string) {
     // }
 }
 
-async function renderSass(fileName: string) {
+async function renderSass(fileName: string, destination: string) {
     try {
         if (sheetloaf.opts().async === true) {
             //TODO
@@ -116,7 +130,7 @@ async function renderSass(fileName: string) {
                 sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
             };
             const result = await sass.compileAsync(fileName, options);
-            console.log(result.css);
+            renderPost(fileName, destination, result);
         } else {
             const options: Options<"sync"> = {
                 style: sheetloaf.opts().style,
@@ -125,42 +139,73 @@ async function renderSass(fileName: string) {
                 sourceMapIncludeSources: sheetloaf.opts().sourceMap === false ? false : true
             };
             const result = sass.compile(fileName, options);
-            console.log(result.css);
+            renderPost(fileName, destination, result);
         }
-    } catch (e) {
-        console.log(e);
+    } catch (e: any) {
+        sassErrorCatcher(e, destination);
     }
 }
 
-function renderPost(result: any) {
+function renderPost(fileName: string, destination: string, sassResult: any) {
 
+    let postcssMapOptions: any = {
+        annotation: true,
+        prev: sassResult.sourceMap,
+        inline: sheetloaf.opts().embedSourceMap === true ? true : false,
+        absolute: sheetloaf.opts().sourceMapUrls === 'absolute' ? true : false,
+        sourcesContent: sheetloaf.opts().embedSources === true ? true : false,
+    };
+
+    if (usingStdin === false && sheetloaf.opts().sourceMap === false) {
+        postcssMapOptions = false;
+    }
+    //console.log(postcssMapOptions);
+    postcss(postcssConfig.plugins)
+        .process(sassResult.css.toString(), {
+            from: fileName,
+            to: destination,
+            map: postcssMapOptions
+        })
+        .then((postedResult) => {
+            console.log(postedResult);
+            postedResult.warnings().forEach((warn) => {
+                process.stderr.write(warn.toString());
+            });
+
+            if (destination !== '') {
+                try {
+                    fs.mkdirSync(path.dirname(destination), {
+                        recursive: true
+                    });
+                } catch (err: any) {
+                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err;
+                }
+
+                fs.writeFile(destination, postedResult.css, (err) => {
+                    // throws an error, you could also catch it here
+                    if (err) throw err;
+
+                    // success case, the file was saved
+                    console.log(color.green(`Successfully written to ${destination}`));
+                });
+
+                if (postedResult.map) {
+                    fs.writeFile(destination + '.map', postedResult.map.toString(), (err) => {
+                        if (err) throw err;
+                    });
+                }
+            } else {
+                process.stdout.write(postedResult.css);
+            }
+        })
+        .catch((err) => {
+            if (destination !== '') {
+                console.log(color.red(err));
+            } else {
+                process.stderr.write(err);
+            }
+        });
 }
-
-
-
-
-
-// function generateSassOptions(source, destination) => string {
-//     let obj = {
-//         outFile: destination,
-//         outputStyle: sheetloaf.opts().style,
-//         includePaths: sheetloaf.opts().loadPath ? sheetloaf.opts().loadPath.split(',') : []
-//     };
-
-//     if (usingStdin === true) {
-//         obj.data = source;
-//         obj.sourceMap = false;
-//         obj.sourceMapContents = false;
-//         obj.sourceMapEmbed = false;
-//     } else {
-//         obj.file = source;
-//         obj.sourceMap = sheetloaf.opts().sourceMap === false ? false : true;
-//         obj.sourceMapContents = sheetloaf.opts().sourceMap === false ? false : true;
-//         obj.sourceMapEmbed = sheetloaf.opts().sourceMap === false ? false : true;
-//     }
-
-//     return "hello";
-// }
 
 
 
@@ -241,34 +286,98 @@ function expandGlob(input: string[], callback: (expanded: string[]) => void) {
 
 
 // TODO: returning a blank string seems super messy, this could use a refactor.
-function createDestination(fileName: string, outFile: string, dir: string, base: string, extension: string, usingStdin: boolean) {
-    let result = '';
-    let mirror = '';
-
-    if (!outFile) outFile = '';
-    if (!extension) extension = '.css';
+/**
+ *
+ * @param filename
+ * @returns path, or a blank string if the combination of options provided does not give a valid path.
+ */
+function buildDestinationPath(fileName: string, outFile: string = '', dir: string = '', base: string = '', extension: string = '.css', usingStdin: boolean) {
+    let destination: string = '';
+    let mirror: string = '';
 
     if (usingStdin === true) {
         if (outFile.length > 0) {
-            result = outFile;
+            destination = outFile;
         } else {
-            result = '';
+            destination = '';
         }
     } else {
-        if (!dir) dir = '';
-        if (!base) base = '';
-
         if (dir.length > 0) {
             if (base.length > 0) {
                 mirror = path.dirname(fileName.replace(path.join(base, '/'), ''));
             }
-            result = path.join(dir, mirror, path.basename(fileName, path.extname(fileName)) + extension);
+            destination = path.join(dir, mirror, path.basename(fileName, path.extname(fileName)) + extension);
         } else if (outFile.length > 0) {
-            result = outFile;
+            destination = outFile;
         } else {
-            result = '';
+            destination = '';
         }
     }
 
-    return result;
+    return destination;
+}
+
+function sassErrorCatcher(e: any, destination: string) {
+    if (destination !== '') {
+        console.log(e.message);
+        try {
+            fs.mkdirSync(path.dirname(destination), {
+                recursive: true
+            });
+        } catch (mkDirErr: any) {
+            if (mkDirErr.code !== 'EEXIST' || mkDirErr.code !== 'EISDIR') throw mkDirErr;
+        }
+
+        if (sheetloaf.opts().errorCss !== false) {
+            fs.writeFile(destination, emitSassError(e), (writeFileErr) => {
+                // throws an error, you could also catch it here
+                if (writeFileErr) throw writeFileErr;
+
+                // success case, the file was saved
+                console.log(color.yellow(`Emitted error to ${destination}`));
+            });
+        }
+    } else {
+        process.stderr.write(e.message);
+    }
+
+    if (!sheetloaf.opts().watch && (process.exitCode == null || process.exitCode === 0)) {
+        process.exitCode = 1;
+    }
+}
+
+/**
+ * Build a new CSS file that contains the error and puts its content in the body.
+ * @param {*} err
+ */
+function emitSassError(err: any) {
+    let css = `body:before { content: 'Error at: ${err.span}';display: table;background-color:#cc0000;color:white;border-radius:5px;margin-bottom:5px;padding:5px;font-family:sans-serif}body:after { content: '${err.sassMessage}';display: table;background-color:#0e70b0;color:white;border-radius:5px;padding:5px;margin-bottom: 5px;font-family:sans-serif}body * { display: none; }`;
+
+    return css;
+}
+
+/**
+ * Generates an object used for postcss configuration.
+ */
+function generatePostcssConfig(configArg: string = '', use: string) {
+    let obj = {
+        plugins: []
+    };
+    // If user specifies --use, we ignore postcss config files.
+    if (use) {
+        // TODO implement this
+        // use.split(',').forEach(function (plugin) {
+        //     obj.plugins.push(require(plugin));
+        // });
+    } else {
+        let configFileLoc: string = path.resolve(process.cwd(), configArg, 'postcss.config.js');
+
+        try {
+            fs.lstatSync(configFileLoc);
+            obj = require(configFileLoc);
+        } catch (e) {
+            // TODO
+        }
+    }
+    return obj;
 }
