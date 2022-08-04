@@ -2,11 +2,11 @@ import assert from 'assert';
 import * as fileFinder from '../fileFinder';
 
 describe('When CLI Arguments Need Further Parsing Test', () => {
-    describe('fileFinder.expandGlob() Test', () => {
+    describe('fileFinder.getAllFilesPathsFromSources() Test', () => {
         it('Should return array containing a single input when source is a single file', () => {
             let sources = ['test/samples/styles/file.scss'];
             let expected = ['test/samples/styles/file.scss'];
-            fileFinder.expandGlob(sources, function (entries: string[]) {
+            fileFinder.getAllFilesPathsFromSources(sources, function (entries: string[]) {
                 assert.deepStrictEqual(entries.sort(), expected.sort());
             });
         });
@@ -21,7 +21,7 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
                 'test/samples/styles/file.scss',
                 'test/samples/styles/thing.js'
             ];
-            fileFinder.expandGlob(sources, function (entries: string[]) {
+            fileFinder.getAllFilesPathsFromSources(sources, function (entries: string[]) {
                 assert.deepStrictEqual(entries.sort(), expected.sort());
             });
         });
@@ -29,7 +29,7 @@ describe('When CLI Arguments Need Further Parsing Test', () => {
         it('Should return array of inputs when source is a glob', () => {
             let sources = ['test/samples/styles/sub/**/*.scss'];
             let expected = ['test/samples/styles/sub/baz.scss', 'test/samples/styles/sub/ack/foo.scss'];
-            fileFinder.expandGlob(sources, function (entries: string[]) {
+            fileFinder.getAllFilesPathsFromSources(sources, function (entries: string[]) {
                 assert.deepStrictEqual(entries.sort(), expected.sort());
             });
         });
