@@ -10,27 +10,55 @@ import { OptionValues } from "commander";
 export type postcssConfigFile = {
     plugins: AcceptedPlugin[]
 }
-export function generatePostcssConfig(configArg: string = '', use: string) {
+// export function generatePostcssConfig({ configArg: '', useArg: ''}) {
+//     console.log(typeof useArg);
+//     let obj: postcssConfigFile = {
+//         plugins: []
+//     };
+//     // If user specifies --use, we ignore postcss config files.
+//     if (useArg) {
+//         useArg.split(',').forEach(function (plugin) {
+//             obj.plugins.push(require(plugin));
+//         });
+//     } else {
+//         let configFileLoc: string = path.resolve(process.cwd(), configArg, 'postcss.config.js');
+
+//         try {
+//             fs.lstatSync(configFileLoc);
+//             obj = require(configFileLoc);
+//         } catch (e) {
+//             // TODO
+//         }
+//     }
+//     return obj;
+// }
+
+export function generatePostcssConfigFromFile(configPath: string = '') {
     let obj: postcssConfigFile = {
         plugins: []
     };
-    // If user specifies --use, we ignore postcss config files.
-    if (use) {
-        use.split(',').forEach(function (plugin) {
-            obj.plugins.push(require(plugin));
-        });
-    } else {
-        let configFileLoc: string = path.resolve(process.cwd(), configArg, 'postcss.config.js');
+    let configFileLoc: string = path.resolve(process.cwd(), configPath, 'postcss.config.js');
 
-        try {
-            fs.lstatSync(configFileLoc);
-            obj = require(configFileLoc);
-        } catch (e) {
-            // TODO
-        }
+    try {
+        fs.lstatSync(configFileLoc);
+        obj = require(configFileLoc);
+    } catch (e) {
+        console.log(`No postcss.config.js file found at location ${configPath}`);
+        // TODO
     }
     return obj;
 }
+
+export function generatePostcssConfigFromUse(useArg: string) {
+    let obj: postcssConfigFile = {
+        plugins: []
+    };
+    useArg.split(',').forEach(function (plugin) {
+        obj.plugins.push(require(plugin));
+    });
+    return obj;
+}
+
 
 export function generateSassOptions(opts: OptionValues): Options<"sync"> {
     return {

@@ -55,7 +55,12 @@ sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
     .action((source) => {
-    postcssConfig = configs.generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
+    if (sheetloaf.opts().use) {
+        postcssConfig = configs.generatePostcssConfigFromUse(sheetloaf.opts().use);
+    }
+    else {
+        postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
+    }
     if (source.length > 0) {
         renderAllFiles(source);
         watch(source);
