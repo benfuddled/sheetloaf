@@ -12,6 +12,7 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "outDir": "./dist",
+        "target": "ES2015"
     },
     "files": [
         "index.ts"

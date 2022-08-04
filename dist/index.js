@@ -32,72 +32,45 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.__esModule = true;
-var commander_1 = require("commander");
-var chokidar_1 = __importDefault(require("chokidar"));
-var picocolors_1 = __importDefault(require("picocolors"));
-var fs_1 = __importDefault(require("fs"));
-var path_1 = __importDefault(require("path"));
-var sass_1 = __importDefault(require("sass"));
-var postcss_1 = __importDefault(require("postcss"));
-var configs = __importStar(require("./configs"));
-var fileFinder = __importStar(require("./fileFinder"));
-var sheetloaf = new commander_1.Command();
+Object.defineProperty(exports, "__esModule", { value: true });
+const commander_1 = require("commander");
+const chokidar_1 = __importDefault(require("chokidar"));
+const picocolors_1 = __importDefault(require("picocolors"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const sass_1 = __importDefault(require("sass"));
+const postcss_1 = __importDefault(require("postcss"));
+const configs = __importStar(require("./configs"));
+const fileFinder = __importStar(require("./fileFinder"));
+const sheetloaf = new commander_1.Command();
 sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
-var usingStdin = false;
-var postcssConfig = {
+let usingStdin = false;
+let postcssConfig = {
     plugins: []
 };
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
-    .action(function (source) {
+    .action((source) => {
     postcssConfig = configs.generatePostcssConfig(sheetloaf.opts().config, sheetloaf.opts().use);
     if (source.length > 0) {
         renderAllFiles(source);
         watch(source);
     }
     else if (!process.stdin.isTTY) {
-        var stdin_1 = '';
-        process.stdin.on('readable', function () {
+        let stdin = '';
+        process.stdin.on('readable', () => {
             var chunk = process.stdin.read();
             if (chunk !== null) {
-                stdin_1 += chunk;
+                stdin += chunk;
             }
         });
-        process.stdin.on('end', function () {
+        process.stdin.on('end', () => {
             usingStdin = true;
-            renderSassFromStdin(stdin_1);
+            renderSassFromStdin(stdin);
         });
     }
 });
@@ -119,12 +92,12 @@ sheetloaf
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
     .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
-    .option('--async', "Use sass' asynchronous API. This may be slower.");
+    .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
 function renderAllFiles(source) {
     fileFinder.expandGlob(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
-            if (path_1["default"].basename(fileName).charAt(0) !== '_') {
+            if (path_1.default.basename(fileName).charAt(0) !== '_') {
                 renderSass(fileName);
             }
         });
@@ -132,7 +105,7 @@ function renderAllFiles(source) {
 }
 function watch(source) {
     if (sheetloaf.opts().watch === true) {
-        chokidar_1["default"]
+        chokidar_1.default
             .watch(source[0].split(','), {
             usePolling: sheetloaf.opts().poll !== undefined,
             interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
@@ -142,104 +115,80 @@ function watch(source) {
                 pollInterval: 100
             }
         })
-            .on('change', function (changed) {
-            console.log("File changed: ".concat(changed));
+            .on('change', (changed) => {
+            console.log(`File changed: ${changed}`);
             renderAllFiles(source);
         })
-            .on('add', function (added) {
-            console.log("File added: ".concat(added));
+            .on('add', (added) => {
+            console.log(`File added: ${added}`);
             renderAllFiles(source);
         });
     }
 }
 function renderSass(fileName) {
-    return __awaiter(this, void 0, void 0, function () {
-        var destination, options, result, options, result, e_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    destination = fileFinder.buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 5, , 6]);
-                    if (!(sheetloaf.opts().async === true)) return [3, 3];
-                    options = configs.generateSassOptionsAsync(sheetloaf.opts());
-                    return [4, sass_1["default"].compileAsync(fileName, options)];
-                case 2:
-                    result = _a.sent();
-                    renderPost(fileName, destination, result);
-                    return [3, 4];
-                case 3:
-                    options = configs.generateSassOptions(sheetloaf.opts());
-                    result = sass_1["default"].compile(fileName, options);
-                    renderPost(fileName, destination, result);
-                    _a.label = 4;
-                case 4: return [3, 6];
-                case 5:
-                    e_1 = _a.sent();
-                    sassErrorCatcher(e_1, destination);
-                    return [3, 6];
-                case 6: return [2];
+    return __awaiter(this, void 0, void 0, function* () {
+        const destination = fileFinder.buildDestinationPath(fileName, sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+        try {
+            if (sheetloaf.opts().async === true) {
+                const options = configs.generateSassOptionsAsync(sheetloaf.opts());
+                const result = yield sass_1.default.compileAsync(fileName, options);
+                renderPost(fileName, destination, result);
             }
-        });
+            else {
+                const options = configs.generateSassOptions(sheetloaf.opts());
+                const result = sass_1.default.compile(fileName, options);
+                renderPost(fileName, destination, result);
+            }
+        }
+        catch (e) {
+            sassErrorCatcher(e, destination);
+        }
     });
 }
 function renderSassFromStdin(text) {
-    return __awaiter(this, void 0, void 0, function () {
-        var destination, options, result, options, result, e_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    destination = fileFinder.buildDestinationPath('', sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 5, , 6]);
-                    if (!(sheetloaf.opts().async === true)) return [3, 3];
-                    options = configs.generateSassOptionsAsync(sheetloaf.opts());
-                    return [4, sass_1["default"].compileStringAsync(text, options)];
-                case 2:
-                    result = _a.sent();
-                    renderPost('', destination, result);
-                    return [3, 4];
-                case 3:
-                    options = configs.generateSassOptions(sheetloaf.opts());
-                    result = sass_1["default"].compileString(text, options);
-                    renderPost('', destination, result);
-                    _a.label = 4;
-                case 4: return [3, 6];
-                case 5:
-                    e_2 = _a.sent();
-                    sassErrorCatcher(e_2, destination);
-                    return [3, 6];
-                case 6: return [2];
+    return __awaiter(this, void 0, void 0, function* () {
+        const destination = fileFinder.buildDestinationPath('', sheetloaf.opts().output, sheetloaf.opts().dir, sheetloaf.opts().base, sheetloaf.opts().ext, usingStdin);
+        try {
+            if (sheetloaf.opts().async === true) {
+                const options = configs.generateSassOptionsAsync(sheetloaf.opts());
+                const result = yield sass_1.default.compileStringAsync(text, options);
+                renderPost('', destination, result);
             }
-        });
+            else {
+                const options = configs.generateSassOptions(sheetloaf.opts());
+                const result = sass_1.default.compileString(text, options);
+                renderPost('', destination, result);
+            }
+        }
+        catch (e) {
+            sassErrorCatcher(e, destination);
+        }
     });
 }
 function renderPost(fileName, destination, sassResult) {
-    var postcssMapOptions = {
+    let postcssMapOptions = {
         annotation: true,
         prev: sassResult.sourceMap,
         inline: sheetloaf.opts().embedSourceMap === true ? true : false,
         absolute: sheetloaf.opts().sourceMapUrls === 'absolute' ? true : false,
-        sourcesContent: sheetloaf.opts().embedSources === true ? true : false
+        sourcesContent: sheetloaf.opts().embedSources === true ? true : false,
     };
     if (usingStdin === true || sheetloaf.opts().sourceMap === false) {
         postcssMapOptions = false;
     }
-    (0, postcss_1["default"])(postcssConfig.plugins)
+    (0, postcss_1.default)(postcssConfig.plugins)
         .process(sassResult.css.toString(), {
         from: fileName,
         to: destination,
         map: postcssMapOptions
     })
-        .then(function (postedResult) {
-        postedResult.warnings().forEach(function (warn) {
+        .then((postedResult) => {
+        postedResult.warnings().forEach((warn) => {
             process.stderr.write(warn.toString());
         });
         if (destination !== '') {
             try {
-                fs_1["default"].mkdirSync(path_1["default"].dirname(destination), {
+                fs_1.default.mkdirSync(path_1.default.dirname(destination), {
                     recursive: true
                 });
             }
@@ -247,13 +196,13 @@ function renderPost(fileName, destination, sassResult) {
                 if (err.code !== 'EEXIST' || err.code !== 'EISDIR')
                     throw err;
             }
-            fs_1["default"].writeFile(destination, postedResult.css, function (err) {
+            fs_1.default.writeFile(destination, postedResult.css, (err) => {
                 if (err)
                     throw err;
-                console.log(picocolors_1["default"].green("Successfully written to ".concat(destination)));
+                console.log(picocolors_1.default.green(`Successfully written to ${destination}`));
             });
             if (postedResult.map) {
-                fs_1["default"].writeFile(destination + '.map', postedResult.map.toString(), function (err) {
+                fs_1.default.writeFile(destination + '.map', postedResult.map.toString(), (err) => {
                     if (err)
                         throw err;
                 });
@@ -262,9 +211,10 @@ function renderPost(fileName, destination, sassResult) {
         else {
             process.stdout.write(postedResult.css);
         }
-    })["catch"](function (err) {
+    })
+        .catch((err) => {
         if (destination !== '') {
-            console.log(picocolors_1["default"].red(err));
+            console.log(picocolors_1.default.red(err));
         }
         else {
             process.stderr.write(err);
@@ -275,7 +225,7 @@ function sassErrorCatcher(e, destination) {
     if (destination !== '') {
         console.log(e.message);
         try {
-            fs_1["default"].mkdirSync(path_1["default"].dirname(destination), {
+            fs_1.default.mkdirSync(path_1.default.dirname(destination), {
                 recursive: true
             });
         }
@@ -284,10 +234,10 @@ function sassErrorCatcher(e, destination) {
                 throw mkDirErr;
         }
         if (sheetloaf.opts().errorCss !== false) {
-            fs_1["default"].writeFile(destination, emitSassError(e), function (writeFileErr) {
+            fs_1.default.writeFile(destination, emitSassError(e), (writeFileErr) => {
                 if (writeFileErr)
                     throw writeFileErr;
-                console.log(picocolors_1["default"].yellow("Emitted error to ".concat(destination)));
+                console.log(picocolors_1.default.yellow(`Emitted error to ${destination}`));
             });
         }
     }
@@ -299,9 +249,31 @@ function sassErrorCatcher(e, destination) {
     }
 }
 function emitSassError(err) {
-    var span = err.span.toString().replace(/'.*'/i, '');
-    var message = err.sassMessage.toString().replace(/'.*'/i, '');
-    var css = "\n        body:before { \n            content: 'Error from ".concat(span, "';\n            display: table;\n            background-color:#cc0000;\n            color:white;\n            border-radius:5px;\n            margin-bottom:5px;\n            padding:5px;\n            font-family:sans-serif\n        }\n        body:after { \n            content: \"").concat(message, "\";\n            display: table;\n            background-color:#0e70b0;\n            color:white;\n            border-radius:5px;\n            padding:5px;\n            margin-bottom: 5px;\n            font-family:sans-serif\n        }\n        body * { display: none; }\n    ");
+    const span = err.span.toString().replace(/'.*'/i, '');
+    const message = err.sassMessage.toString().replace(/'.*'/i, '');
+    let css = `
+        body:before { 
+            content: 'Error from ${span}';
+            display: table;
+            background-color:#cc0000;
+            color:white;
+            border-radius:5px;
+            margin-bottom:5px;
+            padding:5px;
+            font-family:sans-serif
+        }
+        body:after { 
+            content: "${message}";
+            display: table;
+            background-color:#0e70b0;
+            color:white;
+            border-radius:5px;
+            padding:5px;
+            margin-bottom: 5px;
+            font-family:sans-serif
+        }
+        body * { display: none; }
+    `;
     return css;
 }
 //# sourceMappingURL=index.js.map
