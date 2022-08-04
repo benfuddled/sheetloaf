@@ -122,6 +122,9 @@ function watch(source: string) {
 }
 
 async function renderSass(fileName: string) {
+    if (usingStdin === false) {
+        console.log(`Rendering ${fileName}...`);
+    }
     const destination = fileFinder.buildDestinationPath(
         fileName,
         sheetloaf.opts().output,

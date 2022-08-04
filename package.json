@@ -1,12 +1,11 @@
 {
 	"name": "sheetloaf",
-	"version": "1.2.0-beta.0",
+	"version": "1.2.0-beta.2",
 	"description": "freshmade stylesheets for the whole family.",
 	"main": "./dist/index.js",
 	"bin": {
 		"sheetloaf": "./dist/index.js"
 	},
-	"type": "module",
 	"scripts": {
 		"build:development": "tsc --watch",
 		"build:production": "tsc",
