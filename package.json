@@ -6,9 +6,10 @@
 	"bin": {
 		"sheetloaf": "./dist/index.js"
 	},
+	"type": "module",
 	"scripts": {
-		"build:development": "tsc --noEmit && esbuild index.ts --outdir=dist --platform=node --target=node12 --sourcemap=inline",
-		"build:production": "esbuild index.ts --outdir=dist --platform=node --target=node12 --minify",
+		"build:development": "tsc --watch",
+		"build:production": "tsc",
 		"test": "mocha -r ts-node/register test/*.test.ts",
 		"test2": "node . \"test/samples/styles/**/*.scss\" --dir \"test/samples/render/\" --load-path \"test/samples/lib\" --style compressed --base test/samples/styles/ --use autoprefixer,postcss-custom-properties",
 		"test3": "cat test/samples/styles/file.scss | node . --style compressed --use autoprefixer --load-path test/samples/styles > test/samples/render/file.css",
@@ -39,7 +40,6 @@
 		"@types/picomatch": "^2.3.0",
 		"@types/sass": "^1.43.1",
 		"autoprefixer": "^10.4.8",
-		"esbuild": "^0.14.53",
 		"mocha": "^9.2.2",
 		"postcss": "^8.4.14",
 		"postcss-custom-properties": "^12.1.8",

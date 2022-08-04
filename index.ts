@@ -84,7 +84,6 @@ sheetloaf
     .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
-
 sheetloaf.parse(process.argv);
 
 function renderAllFiles(source: string) {
