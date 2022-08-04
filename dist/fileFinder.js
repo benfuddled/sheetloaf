@@ -3,60 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildDestinationPath = exports.getAllFilesPathsFromSources = exports.expandGlob = void 0;
+exports.buildDestinationPath = exports.getAllFilesPathsFromSources = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const picomatch_1 = __importDefault(require("picomatch"));
 const fast_glob_1 = __importDefault(require("fast-glob"));
-function expandGlob(input, callback) {
-    let expanded = [];
-    for (let i = 0; i < input.length; i++) {
-        let isGlob = false;
-        let isDir = false;
-        let isFile = false;
-        isGlob = picomatch_1.default.scan(input[i]).isGlob;
-        if (isGlob === false) {
-            try {
-                isDir = fs_1.default.lstatSync(path_1.default.normalize(input[i])).isDirectory();
-                isFile = fs_1.default.lstatSync(path_1.default.normalize(input[i])).isFile();
-            }
-            catch (err) {
-                throw err;
-            }
-        }
-        if (isGlob || isFile) {
-            let files = fast_glob_1.default
-                .sync(input[i], {
-                dot: true
-            })
-                .map((entry) => path_1.default.normalize(entry));
-            expanded.push(...files);
-            if (i === (input.length - 1)) {
-                callback(expanded);
-            }
-        }
-        else if (isDir) {
-            let dir = input[i];
-            fs_1.default.readdir(dir, (err, files) => {
-                if (err) {
-                    throw err;
-                }
-                else {
-                    files.forEach((file) => {
-                        let fullname = path_1.default.join(dir, file);
-                        if (!fs_1.default.lstatSync(fullname).isDirectory()) {
-                            expanded.push(fullname);
-                        }
-                    });
-                    if (i === (input.length - 1)) {
-                        callback(expanded);
-                    }
-                }
-            });
-        }
-    }
-}
-exports.expandGlob = expandGlob;
 function getAllFilesPathsFromSources(input, callback) {
     let sourcesCompleted = 0;
     let filePaths = [];

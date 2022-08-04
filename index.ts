@@ -83,7 +83,7 @@ sheetloaf
 sheetloaf.parse(process.argv);
 
 function renderAllFiles(source: string) {
-    fileFinder.expandGlob(source[0].split(','), function (entries) {
+    fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
                 renderSass(fileName);

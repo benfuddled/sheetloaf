@@ -95,7 +95,7 @@ sheetloaf
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
 function renderAllFiles(source) {
-    fileFinder.expandGlob(source[0].split(','), function (entries) {
+    fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path_1.default.basename(fileName).charAt(0) !== '_') {
                 renderSass(fileName);
