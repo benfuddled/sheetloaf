@@ -70,6 +70,8 @@ Advanced options:
   --poll    Use polling for file watching. Can optionally pass polling [boolean]
             interval; default 100 ms
   --config  Set a custom directory to look for a config file            [string]
+  --async   Use Sass's compileAsyc/compileStringAsync functions.       [boolean]
+            This will be slower in most cases.
 
 Misc:
   -v, --version  Show version number                                   [boolean]

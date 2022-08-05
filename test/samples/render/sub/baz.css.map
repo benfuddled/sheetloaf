@@ -1,1 +1,1 @@
-{"version":3,"sources":[],"names":[],"mappings":"","file":"baz.css"}
+{"version":3,"sources":["file:///home/ben/Projects/sheetloaf/test/samples/styles/_partial.scss","file:///home/ben/Projects/sheetloaf/test/samples/styles/sub/baz.scss"],"names":[],"mappings":"AAAA,EACI,SAAA,CAEA,iBAAA,CAGJ,aACI,eAAA,CACA,YAAA,CACA,WAAA,CACA,eAAA,CACA,iBAAA,CACA,QAAA,CACA,SAAA,CCXJ,KACI,UAAA","file":"baz.css"}

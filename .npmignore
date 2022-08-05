@@ -1,0 +1,8 @@
+node_modules
+test
+tsconfig.development.json
+tsconfig.production.json
+package-lock.json
+.gitignore
+.npmignore
+.github
