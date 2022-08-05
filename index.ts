@@ -206,11 +206,12 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 }
 
                 fs.writeFile(destination, postedResult.css, (err) => {
-                    // throws an error, you could also catch it here
-                    if (err) throw err;
-
-                    // success case, the file was saved
-                    console.log(color.green(`Successfully written to ${destination}`));
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        // success case, the file was saved
+                        console.log(color.green(`Successfully written to ${destination}`));
+                    }
                 });
 
                 if (postedResult.map) {
