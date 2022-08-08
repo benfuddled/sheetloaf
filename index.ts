@@ -5,8 +5,6 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import picomatch from 'picomatch';
-import fg from 'fast-glob';
 import sass, { Options } from 'sass';
 import postcss from 'postcss';
 
