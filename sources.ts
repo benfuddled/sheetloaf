@@ -5,11 +5,15 @@ export class SassSources {
     absoluteMain: string;
     main: string;
     sources: string[] = [];
-    constructor(filename: string, sassResult: CompileResult) {
-        this.main = filename;
-        this.absoluteMain = path.resolve(filename);
+    constructor(fileName: string, sassResult: CompileResult) {
+        this.main = fileName;
+        this.absoluteMain = path.resolve(fileName);
+        this.setSources(sassResult.loadedUrls);
+    }
 
-        sassResult.loadedUrls.forEach(url => {
+    setSources(urls: URL[]) {
+        this.sources.splice(0, this.sources.length);
+        urls.forEach(url => {
             if (url.pathname !== this.absoluteMain) {
                 this.sources.push(url.pathname);
             }

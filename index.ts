@@ -115,7 +115,7 @@ function renderPartially(fileName: string) {
             // it will not render at all.
             // We therefore check for this condition and rebuild everything
             // if it doesn't exist.
-            sourcesChecker.splice(0, sourcesChecker.length)
+            sourcesChecker.splice(0, sourcesChecker.length);
             renderAllFiles(fileName);
         }
     }
@@ -324,13 +324,9 @@ function emitSassError(err: any) {
 }
 
 function addResultToSourcesChecker(fileName: string, result: CompileResult) {
-    let alreadyExists = false;
     for (let i = 0; i < sourcesChecker.length; i++) {
         if (sourcesChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
-            alreadyExists = true;
+            sourcesChecker[i].setSources(result.loadedUrls);
         }
-    }
-    if (alreadyExists === false) {
-        sourcesChecker.push(new sources.SassSources(fileName, result));
     }
 }
