@@ -100,10 +100,23 @@ function renderPartially(fileName: string) {
     if (path.basename(fileName).charAt(0) !== '_') {
         renderSass(fileName);
     } else {
+        let partialExistsInSassSources = false;
         for (let i = 0; i < sourcesChecker.length; i++) {
             if (sourcesChecker[i].containsPartial(fileName)) {
+                partialExistsInSassSources = true;
                 renderSass(sourcesChecker[i].getMain());
             }
+        }
+        if (partialExistsInSassSources === false) {
+            // SassSources are built with sass's CompileResult object when
+            // sheetloaf initially runs. However, if compilation fails, the 
+            // SassSource will not be generated for that particular file.
+            // That means if a partial is later fixed to not error out and
+            // it will not render at all.
+            // We therefore check for this condition and rebuild everything
+            // if it doesn't exist.
+            sourcesChecker.splice(0, sourcesChecker.length)
+            renderAllFiles(fileName);
         }
     }
 }
