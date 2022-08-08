@@ -19,7 +19,7 @@ let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
-let sourceChecker: sources.SassSources[] = [];
+let sourcesChecker: sources.SassSources[] = [];
 
 sheetloaf
     .arguments('[sources...]')
@@ -100,9 +100,9 @@ function renderPartially(fileName: string) {
     if (path.basename(fileName).charAt(0) !== '_') {
         renderSass(fileName);
     } else {
-        for (let i = 0; i < sourceChecker.length; i++) {
-            if (sourceChecker[i].containsPartial(fileName)) {
-                renderSass(sourceChecker[i].getMain());
+        for (let i = 0; i < sourcesChecker.length; i++) {
+            if (sourcesChecker[i].containsPartial(fileName)) {
+                renderSass(sourcesChecker[i].getMain());
             }
         }
     }
@@ -129,17 +129,15 @@ function watch(source: string) {
                 console.log(`File added: ${added}`);
 
                 // Clear out old info.
-                sourceChecker.splice(0, sourceChecker.length)
+                sourcesChecker.splice(0, sourcesChecker.length)
                 renderAllFiles(source);
             });
     }
 }
 
 async function renderSass(fileName: string) {
-    // todo, this if statement is probably no longer needed
-    if (usingStdin === false) {
-        console.log(`Rendering ${fileName}...`);
-    }
+    console.log(`Rendering ${fileName}...`);
+
     const destination = fileFinder.buildDestinationPath(
         fileName,
         sheetloaf.opts().output,
@@ -153,18 +151,12 @@ async function renderSass(fileName: string) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sass.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
-            // todo, this if statement probably isn't needed
-            if (usingStdin === false) {
-                addResultToSourceChecker(fileName, result);
-            }
+            addResultToSourcesChecker(fileName, result);
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sass.compile(fileName, options);
             renderPost(fileName, destination, result);
-            // todo, this if statement probably isn't needed
-            if (usingStdin === false) {
-                addResultToSourceChecker(fileName, result);
-            }
+            addResultToSourcesChecker(fileName, result);
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
@@ -318,14 +310,14 @@ function emitSassError(err: any) {
     return css;
 }
 
-function addResultToSourceChecker(fileName: string, result: CompileResult) {
+function addResultToSourcesChecker(fileName: string, result: CompileResult) {
     let alreadyExists = false;
-    for (let i = 0; i < sourceChecker.length; i++) {
-        if (sourceChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
+    for (let i = 0; i < sourcesChecker.length; i++) {
+        if (sourcesChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
             alreadyExists = true;
         }
     }
     if (alreadyExists === false) {
-        sourceChecker.push(new sources.SassSources(fileName, result));
+        sourcesChecker.push(new sources.SassSources(fileName, result));
     }
 }
