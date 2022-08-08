@@ -10,6 +10,7 @@ import postcss from 'postcss';
 
 import * as configs from './configs';
 import * as fileFinder from './fileFinder';
+import * as sources from './sources';
 
 const sheetloaf = new Command();
 sheetloaf.version("1.3.0", '-v, --version', 'Print the version of Sheetloaf.');
@@ -18,6 +19,7 @@ let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
+let sourceChecker: sources.SassSources[] = [];
 
 sheetloaf
     .arguments('[sources...]')
@@ -120,6 +122,7 @@ function watch(source: string) {
 }
 
 async function renderSass(fileName: string) {
+    // todo, this if statement is probably no longer needed
     if (usingStdin === false) {
         console.log(`Rendering ${fileName}...`);
     }
@@ -136,10 +139,18 @@ async function renderSass(fileName: string) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sass.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
+            // todo, this if statement probably isn't needed
+            if (usingStdin === false) {
+                sourceChecker.push(new sources.SassSources(fileName, result));
+            }
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sass.compile(fileName, options);
             renderPost(fileName, destination, result);
+            // todo, this if statement probably isn't needed
+            if (usingStdin === false) {
+                sourceChecker.push(new sources.SassSources(fileName, result));
+            }
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
@@ -171,7 +182,6 @@ async function renderSassFromStdin(text: string) {
 }
 
 function renderPost(fileName: string, destination: string, sassResult: any) {
-
     let postcssMapOptions: any = {
         annotation: true,
         prev: sassResult.sourceMap,
