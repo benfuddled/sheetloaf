@@ -24,7 +24,7 @@ let sourcesChecker: sources.SassSources[] = [];
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
-    .action((source: string) => {
+    .action((source: string[]) => {
         if (sheetloaf.opts().use) {
             // If user specifies --use, we ignore postcss config files.
             postcssConfig = configs.generatePostcssConfigFromUse(sheetloaf.opts().use);
@@ -86,7 +86,7 @@ sheetloaf
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
 
-function renderAllFiles(source: string) {
+function renderAllFiles(source: string[]) {
     fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
@@ -96,7 +96,7 @@ function renderAllFiles(source: string) {
     });
 }
 
-function renderPartially(fileName: string) {
+function renderPartially(source: string[], fileName: string) {
     if (path.basename(fileName).charAt(0) !== '_') {
         renderSass(fileName);
     } else {
@@ -108,6 +108,7 @@ function renderPartially(fileName: string) {
             }
         }
         if (partialExistsInSassSources === false) {
+            console.log(fileName);
             // SassSources are built with sass's CompileResult object when
             // sheetloaf initially runs. However, if compilation fails, the 
             // SassSource will not be generated for that particular file.
@@ -116,12 +117,12 @@ function renderPartially(fileName: string) {
             // We therefore check for this condition and rebuild everything
             // if it doesn't exist.
             sourcesChecker.splice(0, sourcesChecker.length);
-            renderAllFiles(fileName);
+            renderAllFiles(source);
         }
     }
 }
 
-function watch(source: string) {
+function watch(source: string[]) {
     if (sheetloaf.opts().watch === true) {
         chokidar
             .watch(source[0].split(','), {
@@ -136,7 +137,7 @@ function watch(source: string) {
             .on('change', (changed) => {
                 console.log(`File changed: ${changed}`);
 
-                renderPartially(changed);
+                renderPartially(source, changed);
             })
             .on('add', (added) => {
                 console.log(`File added: ${added}`);
