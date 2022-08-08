@@ -2,23 +2,22 @@ import path from "path";
 import { CompileResult } from "sass";
 
 export class SassSources {
+    absoluteMain: string;
     main: string;
     sources: string[] = [];
     constructor(filename: string, sassResult: CompileResult) {
-        this.main = path.resolve(filename);
+        this.main = filename;
+        this.absoluteMain = path.resolve(filename);
 
         sassResult.loadedUrls.forEach(url => {
-            this.sources.push(url.pathname);
+            if (url.pathname !== this.absoluteMain) {
+                this.sources.push(url.pathname);
+            }
         })
-
-        console.log('******************');
-        console.log(this.main);
-        console.log(this.sources);
-        console.log('******************');
     }
 
-    usedBy(fileName: string) {
-        if (fileName === this.main) {
+    containsPartial(filename: string) {
+        if (this.sources.indexOf(path.resolve(filename)) >= 0) {
             return true;
         } else {
             return false;
@@ -27,6 +26,10 @@ export class SassSources {
 
     getSources() {
         return this.sources;
+    }
+
+    getAbsoluteMain() {
+        return this.absoluteMain;
     }
 
     getMain() {

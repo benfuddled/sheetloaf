@@ -5,7 +5,7 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import sass, { Options } from 'sass';
+import sass, { CompileResult, Options } from 'sass';
 import postcss from 'postcss';
 
 import * as configs from './configs';
@@ -96,6 +96,18 @@ function renderAllFiles(source: string) {
     });
 }
 
+function renderPartially(fileName: string) {
+    if (path.basename(fileName).charAt(0) !== '_') {
+        renderSass(fileName);
+    } else {
+        for (let i = 0; i < sourceChecker.length; i++) {
+            if (sourceChecker[i].containsPartial(fileName)) {
+                renderSass(sourceChecker[i].getMain());
+            }
+        }
+    }
+}
+
 function watch(source: string) {
     if (sheetloaf.opts().watch === true) {
         chokidar
@@ -111,11 +123,13 @@ function watch(source: string) {
             .on('change', (changed) => {
                 console.log(`File changed: ${changed}`);
 
-                renderAllFiles(source);
+                renderPartially(changed);
             })
             .on('add', (added) => {
                 console.log(`File added: ${added}`);
 
+                // Clear out old info.
+                sourceChecker.splice(0, sourceChecker.length)
                 renderAllFiles(source);
             });
     }
@@ -141,7 +155,7 @@ async function renderSass(fileName: string) {
             renderPost(fileName, destination, result);
             // todo, this if statement probably isn't needed
             if (usingStdin === false) {
-                sourceChecker.push(new sources.SassSources(fileName, result));
+                addResultToSourceChecker(fileName, result);
             }
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
@@ -149,7 +163,7 @@ async function renderSass(fileName: string) {
             renderPost(fileName, destination, result);
             // todo, this if statement probably isn't needed
             if (usingStdin === false) {
-                sourceChecker.push(new sources.SassSources(fileName, result));
+                addResultToSourceChecker(fileName, result);
             }
         }
     } catch (e: any) {
@@ -302,4 +316,16 @@ function emitSassError(err: any) {
     `;
 
     return css;
+}
+
+function addResultToSourceChecker(fileName: string, result: CompileResult) {
+    let alreadyExists = false;
+    for (let i = 0; i < sourceChecker.length; i++) {
+        if (sourceChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
+            alreadyExists = true;
+        }
+    }
+    if (alreadyExists === false) {
+        sourceChecker.push(new sources.SassSources(fileName, result));
+    }
 }
