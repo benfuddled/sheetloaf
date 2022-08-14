@@ -5,26 +5,26 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import picomatch from 'picomatch';
-import fg from 'fast-glob';
-import sass, { Options } from 'sass';
+import sass, { CompileResult, Options } from 'sass';
 import postcss from 'postcss';
 
 import * as configs from './configs';
 import * as fileFinder from './fileFinder';
+import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.2.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.3.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
+let sourcesChecker: sources.SassSources[] = [];
 
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
-    .action((source: string) => {
+    .action((source: string[]) => {
         if (sheetloaf.opts().use) {
             // If user specifies --use, we ignore postcss config files.
             postcssConfig = configs.generatePostcssConfigFromUse(sheetloaf.opts().use);
@@ -86,7 +86,7 @@ sheetloaf
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
 
-function renderAllFiles(source: string) {
+function renderAllFiles(source: string[]) {
     fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {
             if (path.basename(fileName).charAt(0) !== '_') {
@@ -96,7 +96,33 @@ function renderAllFiles(source: string) {
     });
 }
 
-function watch(source: string) {
+function renderPartially(source: string[], fileName: string) {
+    if (path.basename(fileName).charAt(0) !== '_') {
+        renderSass(fileName);
+    } else {
+        let partialExistsInSassSources = false;
+        for (let i = 0; i < sourcesChecker.length; i++) {
+            if (sourcesChecker[i].containsPartial(fileName)) {
+                partialExistsInSassSources = true;
+                renderSass(sourcesChecker[i].getMain());
+            }
+        }
+        if (partialExistsInSassSources === false) {
+            console.log(fileName);
+            // SassSources are built with sass's CompileResult object when
+            // sheetloaf initially runs. However, if compilation fails, the 
+            // SassSource will not be generated for that particular file.
+            // That means if a partial is later fixed to not error out and
+            // it will not render at all.
+            // We therefore check for this condition and rebuild everything
+            // if it doesn't exist.
+            sourcesChecker.splice(0, sourcesChecker.length);
+            renderAllFiles(source);
+        }
+    }
+}
+
+function watch(source: string[]) {
     if (sheetloaf.opts().watch === true) {
         chokidar
             .watch(source[0].split(','), {
@@ -111,20 +137,21 @@ function watch(source: string) {
             .on('change', (changed) => {
                 console.log(`File changed: ${changed}`);
 
-                renderAllFiles(source);
+                renderPartially(source, changed);
             })
             .on('add', (added) => {
                 console.log(`File added: ${added}`);
 
+                // Clear out old info.
+                sourcesChecker.splice(0, sourcesChecker.length)
                 renderAllFiles(source);
             });
     }
 }
 
 async function renderSass(fileName: string) {
-    if (usingStdin === false) {
-        console.log(`Rendering ${fileName}...`);
-    }
+    console.log(`Rendering ${fileName}...`);
+
     const destination = fileFinder.buildDestinationPath(
         fileName,
         sheetloaf.opts().output,
@@ -138,10 +165,12 @@ async function renderSass(fileName: string) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sass.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
+            addResultToSourcesChecker(fileName, result);
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sass.compile(fileName, options);
             renderPost(fileName, destination, result);
+            addResultToSourcesChecker(fileName, result);
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
@@ -173,7 +202,6 @@ async function renderSassFromStdin(text: string) {
 }
 
 function renderPost(fileName: string, destination: string, sassResult: any) {
-
     let postcssMapOptions: any = {
         annotation: true,
         prev: sassResult.sourceMap,
@@ -294,4 +322,12 @@ function emitSassError(err: any) {
     `;
 
     return css;
+}
+
+function addResultToSourcesChecker(fileName: string, result: CompileResult) {
+    for (let i = 0; i < sourcesChecker.length; i++) {
+        if (sourcesChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
+            sourcesChecker[i].setSources(result.loadedUrls);
+        }
+    }
 }
