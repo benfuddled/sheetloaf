@@ -13,13 +13,12 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.3.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.3.1-beta.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
-let sourcesChecker: sources.SassSources[] = [];
 
 sheetloaf
     .arguments('[sources...]')
@@ -101,10 +100,10 @@ function renderPartially(source: string[], fileName: string) {
         renderSass(fileName);
     } else {
         let partialExistsInSassSources = false;
-        for (let i = 0; i < sourcesChecker.length; i++) {
-            if (sourcesChecker[i].containsPartial(fileName)) {
+        for (let i = 0; i < sources.getChecker().length; i++) {
+            if (sources.getChecker()[i].containsPartial(fileName)) {
                 partialExistsInSassSources = true;
-                renderSass(sourcesChecker[i].getMain());
+                renderSass(sources.getChecker()[i].getMain());
             }
         }
         if (partialExistsInSassSources === false) {
@@ -116,7 +115,7 @@ function renderPartially(source: string[], fileName: string) {
             // it will not render at all.
             // We therefore check for this condition and rebuild everything
             // if it doesn't exist.
-            sourcesChecker.splice(0, sourcesChecker.length);
+            sources.clearSourcesChecker();
             renderAllFiles(source);
         }
     }
@@ -143,7 +142,7 @@ function watch(source: string[]) {
                 console.log(`File added: ${added}`);
 
                 // Clear out old info.
-                sourcesChecker.splice(0, sourcesChecker.length)
+                sources.clearSourcesChecker();
                 renderAllFiles(source);
             });
     }
@@ -165,12 +164,12 @@ async function renderSass(fileName: string) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sass.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
-            addResultToSourcesChecker(fileName, result);
+            sources.addResultToSourcesChecker(fileName, result);
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sass.compile(fileName, options);
             renderPost(fileName, destination, result);
-            addResultToSourcesChecker(fileName, result);
+            sources.addResultToSourcesChecker(fileName, result);
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
@@ -322,12 +321,4 @@ function emitSassError(err: any) {
     `;
 
     return css;
-}
-
-function addResultToSourcesChecker(fileName: string, result: CompileResult) {
-    for (let i = 0; i < sourcesChecker.length; i++) {
-        if (sourcesChecker[i].getAbsoluteMain() === path.resolve(fileName)) {
-            sourcesChecker[i].setSources(result.loadedUrls);
-        }
-    }
 }

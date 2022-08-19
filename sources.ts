@@ -1,6 +1,8 @@
 import path from "path";
 import { CompileResult } from "sass";
 
+let sourcesChecker: SassSources[] = [];
+
 export class SassSources {
     absoluteMain: string;
     main: string;
@@ -38,5 +40,27 @@ export class SassSources {
 
     getMain() {
         return this.main;
+    }
+}
+
+export function getChecker(): SassSources[] {
+    return sourcesChecker;
+}
+
+export function clearSourcesChecker() {
+    sourcesChecker.splice(0, sourcesChecker.length);
+}
+
+export function addResultToSourcesChecker(fileName: string, result: CompileResult) {
+    let resultExistsInChecker: boolean = false;
+    sourcesChecker.every((source) => {
+        if (source.getAbsoluteMain() === path.resolve(fileName)) {
+            source.setSources(result.loadedUrls);
+            resultExistsInChecker = true;
+            return false;
+        }
+    });
+    if (resultExistsInChecker === false) {
+        sourcesChecker.push(new SassSources(fileName, result));
     }
 }
