@@ -100,13 +100,16 @@ function renderPartially(source: string[], fileName: string) {
         renderSass(fileName);
     } else {
         let partialExistsInSassSources = false;
-        //console.log(sources.getChecker());
-        sources.getChecker().forEach((source) => {
-            if (source.containsPartial(fileName)) {
+        let ind = 0;
+        while (ind < sources.getChecker().length) {
+            const toCheck = sources.getChecker()[ind];
+
+            if (toCheck.containsPartial(fileName)) {
                 partialExistsInSassSources = true;
-                renderSass(source.getMain());
+                renderSass(toCheck.getMain());
             }
-        });
+            ind = ind + 1;
+        }
 
         if (partialExistsInSassSources === false) {
             // SassSources are built with sass's CompileResult object when

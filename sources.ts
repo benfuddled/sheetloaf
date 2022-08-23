@@ -23,6 +23,8 @@ export class SassSources {
     }
 
     containsPartial(filename: string) {
+        // FIXME: source paths are a little weird on windows which is making this check
+        // always return false.
         if (this.sources.indexOf(path.resolve(filename)) >= 0) {
             return true;
         } else {
