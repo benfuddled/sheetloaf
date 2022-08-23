@@ -13,7 +13,7 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.3.1-beta.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.3.1-beta.1", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -100,14 +100,15 @@ function renderPartially(source: string[], fileName: string) {
         renderSass(fileName);
     } else {
         let partialExistsInSassSources = false;
-        for (let i = 0; i < sources.getChecker().length; i++) {
-            if (sources.getChecker()[i].containsPartial(fileName)) {
+        //console.log(sources.getChecker());
+        sources.getChecker().forEach((source) => {
+            if (source.containsPartial(fileName)) {
                 partialExistsInSassSources = true;
-                renderSass(sources.getChecker()[i].getMain());
+                renderSass(source.getMain());
             }
-        }
+        });
+
         if (partialExistsInSassSources === false) {
-            console.log(fileName);
             // SassSources are built with sass's CompileResult object when
             // sheetloaf initially runs. However, if compilation fails, the 
             // SassSource will not be generated for that particular file.

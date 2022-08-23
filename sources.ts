@@ -53,13 +53,17 @@ export function clearSourcesChecker() {
 
 export function addResultToSourcesChecker(fileName: string, result: CompileResult) {
     let resultExistsInChecker: boolean = false;
-    sourcesChecker.every((source) => {
-        if (source.getAbsoluteMain() === path.resolve(fileName)) {
-            source.setSources(result.loadedUrls);
+
+    let ind = 0;
+    while (ind < sourcesChecker.length && resultExistsInChecker === false) {
+
+        if (sourcesChecker[ind].getAbsoluteMain() === path.resolve(fileName)) {
+            sourcesChecker[ind].setSources(result.loadedUrls);
             resultExistsInChecker = true;
-            return false;
         }
-    });
+        ind = ind + 1;
+    }
+
     if (resultExistsInChecker === false) {
         sourcesChecker.push(new SassSources(fileName, result));
     }
