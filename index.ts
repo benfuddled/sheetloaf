@@ -5,7 +5,7 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import sass, { CompileResult, Options } from 'sass';
+import sass, { Options } from 'sass';
 import postcss from 'postcss';
 
 import * as configs from './configs';
@@ -13,7 +13,7 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.3.1-beta.2", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.3.1", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
