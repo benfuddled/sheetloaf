@@ -1,5 +1,6 @@
 import path from "path";
 import { CompileResult } from "sass";
+import { fileURLToPath } from "url";
 
 let sourcesChecker: SassSources[] = [];
 
@@ -16,8 +17,8 @@ export class SassSources {
     setSources(urls: URL[]) {
         this.sources.splice(0, this.sources.length);
         urls.forEach(url => {
-            if (url.pathname !== this.absoluteMain) {
-                this.sources.push(url.pathname);
+            if (fileURLToPath(url.href) !== this.absoluteMain) {
+                this.sources.push(fileURLToPath(url.href));
             }
         })
     }
