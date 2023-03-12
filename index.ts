@@ -297,12 +297,11 @@ function sassErrorCatcher(e: any, destination: string) {
  * @param {*} err
  */
 function emitSassError(err: any) {
-    // Remove quotes
-    const span = err.span.toString().replace(/'.*'/i, '');
-    const message = err.sassMessage.toString().replace(/'.*'/i, '');
+    // Sanitize message so that it fits in a content attribute.
+    const message = err.sassMessage.toString().replace(/'/g, '"');
     let css = `
         body:before { 
-            content: 'Error from ${span}';
+            content: 'Error at line ${err.span.start.line} in ${err.span.url.pathname}';
             display: table;
             background-color:#cc0000;
             color:white;
@@ -312,7 +311,7 @@ function emitSassError(err: any) {
             font-family:sans-serif
         }
         body:after { 
-            content: "${message}";
+            content: '${err.span.context} ----- ${message}';
             display: table;
             background-color:#0e70b0;
             color:white;
