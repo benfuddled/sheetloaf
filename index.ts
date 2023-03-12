@@ -296,10 +296,6 @@ function sassErrorCatcher(e: any, destination: string) {
  * Build a new CSS file that contains the error and puts its content in the body.
  * @param {*} err
  */
-/**
- * Build a new CSS file that contains the error and puts its content in the body.
- * @param {*} err
- */
 function emitSassError(err: any) {
     // Sanitize message so that it fits in a content attribute.
     const message = err.sassMessage.toString().replace(/'/g, '"');
