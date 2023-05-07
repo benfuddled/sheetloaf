@@ -13,7 +13,7 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.8.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.9.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -298,10 +298,11 @@ function sassErrorCatcher(e: any, destination: string) {
  */
 function emitSassError(err: any) {
     // Sanitize message so that it fits in a content attribute.
-    const message = err.sassMessage.toString().replace(/'/g, '"');
+    const message = err.sassMessage.toString().replace(/"/g, "'").replace(/\n/g, " ");
+    const context = err.span.context.toString().replace(/"/g, "'").replace(/\n/g, " ");
     let css = `
         body:before { 
-            content: 'Error at line ${err.span.start.line} in ${err.span.url.pathname}';
+            content: "Error at line ${err.span.start.line} in ${err.span.url.pathname}";
             display: table;
             background-color:#cc0000;
             color:white;
@@ -311,7 +312,7 @@ function emitSassError(err: any) {
             font-family:sans-serif
         }
         body:after { 
-            content: '${err.span.context} ----- ${message}';
+            content: "${context} ----- ${message}";
             display: table;
             background-color:#0e70b0;
             color:white;
