@@ -1,6 +1,6 @@
 {
 	"name": "sheetloaf",
-	"version": "1.13.0",
+	"version": "1.14.0",
 	"description": "freshmade stylesheets for the whole family.",
 	"main": "./dist/index.js",
 	"bin": {
@@ -54,6 +54,6 @@
 		"fast-glob": "^3.2.12",
 		"picocolors": "^1.0.0",
 		"picomatch": "^2.3.1",
-		"sass": "^1.66.1"
+		"sass": "^1.67.0"
 	}
 }
