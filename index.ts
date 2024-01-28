@@ -20,15 +20,23 @@ let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
 
+let sassCompiler: sass.Compiler;
+let sassAsyncCompiler: sass.AsyncCompiler;
+
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
-    .action((source: string[]) => {
+    .action(async (source: string[]) => {
         if (sheetloaf.opts().use) {
             // If user specifies --use, we ignore postcss config files.
             postcssConfig = configs.generatePostcssConfigFromUse(sheetloaf.opts().use);
         } else {
             postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
+        }
+        if (sheetloaf.opts().async === true) {
+            sassAsyncCompiler = await sass.initAsyncCompiler();
+        } else {
+            sassCompiler = sass.initCompiler();
         }
         if (source.length > 0) {
             // If source is provided, we ignore pipes.
@@ -166,12 +174,12 @@ async function renderSass(fileName: string) {
     try {
         if (sheetloaf.opts().async === true) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
-            const result = await sass.compileAsync(fileName, options);
+            const result = await sassAsyncCompiler.compileAsync(fileName, options);
             renderPost(fileName, destination, result);
             sources.addResultToSourcesChecker(fileName, result);
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
-            const result = sass.compile(fileName, options);
+            const result = sassCompiler.compile(fileName, options);
             renderPost(fileName, destination, result);
             sources.addResultToSourcesChecker(fileName, result);
         }
@@ -192,11 +200,11 @@ async function renderSassFromStdin(text: string) {
     try {
         if (sheetloaf.opts().async === true) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
-            const result = await sass.compileStringAsync(text, options);
+            const result = await sassAsyncCompiler.compileStringAsync(text, options);
             renderPost('', destination, result);
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
-            const result = sass.compileString(text, options);
+            const result = sassCompiler.compileString(text, options);
             renderPost('', destination, result);
         }
     } catch (e: any) {
