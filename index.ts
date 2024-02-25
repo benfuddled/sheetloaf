@@ -13,7 +13,7 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.16.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.17.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -80,19 +80,20 @@ sheetloaf
     )
     .option(
         '--source-map-urls <TYPE>',
-        'Controls how the source maps that Sass generates link back to the Sass files  that contributed to the generated CSS. ["relative", "absolute"]',
+        'Controls how the source maps that Sass generates link back to the Sass files that contributed to the generated CSS. ["relative", "absolute"]',
         'relative'
     )
     .option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
     .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
     .option('-I, --load-path <PATHS>', 'Adds an additional load path for Sass to look for stylesheets.')
+    .option('-p, --pkg-importer <TYPE>', `Built-in importer(s) to use for pkg: URLs.\n[node] - Load files like Node.js package resolution.`)
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')
     .option('--config <LOCATION>', 'Set a custom directory to look for a postcss config file.')
     .option('--poll [DURATION]', 'Use polling for file watching. Can optionally pass polling interval; default 100 ms')
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
-
+ 
 function renderAllFiles(source: string[]) {
     fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
         entries.forEach(function (fileName) {

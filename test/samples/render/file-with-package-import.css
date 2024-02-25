@@ -1,6 +1,6 @@
 
         body:before { 
-            content: "Error at line 8 in /home/ben/Projects/sheetloaf/test/samples/styles/file-with-error.scss";
+            content: "Error at line 0 in /home/ben/Projects/sheetloaf/test/samples/styles/file-with-package-import.scss";
             display: table;
             background-color:#cc0000;
             color:white;
@@ -10,7 +10,7 @@
             font-family:sans-serif
         }
         body:after { 
-            content: "} jasldfjkasj; kfjq;wkjf[23rjr23 dj lwdj ;LFKJAS;LDKJ AS;DLJF AS;LKDJFQ3 EDJ ] ----- expected '{'.";
+            content: "@use 'pkg:bootstrap';  ----- Can't find stylesheet to import.";
             display: table;
             background-color:#0e70b0;
             color:white;
