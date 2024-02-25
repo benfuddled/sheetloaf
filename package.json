@@ -4,7 +4,7 @@
 	"description": "freshmade stylesheets for the whole family.",
 	"main": "./dist/index.js",
 	"bin": {
-		"sheetloaf": "./dist/index.js"
+		"sheetloaf": "dist/index.js"
 	},
 	"scripts": {
 		"build:development": "tsc --watch",
