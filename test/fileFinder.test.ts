@@ -18,6 +18,7 @@ describe('When CLI Arguments Need Further Parsing - fileFinder', () => {
                 'test/samples/styles/_partial.scss',
                 'test/samples/styles/file-with-error.scss',
                 'test/samples/styles/file-with-missing-use.scss',
+                'test/samples/styles/file-with-package-import.scss',
                 'test/samples/styles/file.scss',
                 'test/samples/styles/thing.js'
             ];
@@ -41,6 +42,7 @@ describe('When CLI Arguments Need Further Parsing - fileFinder', () => {
                 'test/samples/styles/_partial.scss',
                 'test/samples/styles/file-with-error.scss',
                 'test/samples/styles/file-with-missing-use.scss',
+                'test/samples/styles/file-with-package-import.scss',
                 'test/samples/styles/file.scss',
                 'test/samples/styles/thing.js',
                 'test/samples/styles/sub/baz.scss',
