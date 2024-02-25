@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { AcceptedPlugin } from "postcss";
-import { Options } from "sass";
+import { Options, NodePackageImporter } from "sass";
 import { OptionValues } from "commander";
 
 /**
@@ -41,7 +41,8 @@ export function generateSassOptions(opts: OptionValues): Options<"sync"> {
         style: opts.style,
         loadPaths: opts.loadPath ? opts.loadPath.split(',') : [],
         sourceMap: opts.sourceMap === false ? false : true,
-        sourceMapIncludeSources: opts.sourceMap === false ? false : true
+        sourceMapIncludeSources: opts.sourceMap === false ? false : true,
+        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : []
     };
 }
 
@@ -50,6 +51,7 @@ export function generateSassOptionsAsync(opts: OptionValues): Options<"async"> {
         style: opts.style,
         loadPaths: opts.loadPath ? opts.loadPath.split(',') : [],
         sourceMap: opts.sourceMap === false ? false : true,
-        sourceMapIncludeSources: opts.sourceMap === false ? false : true
+        sourceMapIncludeSources: opts.sourceMap === false ? false : true,
+        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : []
     };
 }

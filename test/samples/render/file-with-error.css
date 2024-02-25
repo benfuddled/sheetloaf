@@ -1,6 +1,6 @@
 
         body:before { 
-            content: 'Error from <_FileSpan: from <FileLocation: 151 file:///home/ben/Projects/sheetloaf/test/samples/styles/file-with-error.scss:9:14> to <FileLocation: 151 file:///home/ben/Projects/sheetloaf/test/samples/styles/file-with-error.scss:9:14> "">';
+            content: "Error at line 8 in /home/ben/Projects/sheetloaf/test/samples/styles/file-with-error.scss";
             display: table;
             background-color:#cc0000;
             color:white;
@@ -10,7 +10,7 @@
             font-family:sans-serif
         }
         body:after { 
-            content: "expected "{".";
+            content: "} jasldfjkasj; kfjq;wkjf[23rjr23 dj lwdj ;LFKJAS;LDKJ AS;DLJF AS;LKDJFQ3 EDJ ] ----- expected '{'.";
             display: table;
             background-color:#0e70b0;
             color:white;

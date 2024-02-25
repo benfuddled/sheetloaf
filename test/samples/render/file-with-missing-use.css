@@ -1,6 +1,6 @@
 
         body:before { 
-            content: 'Error from <_FileSpan: from <FileLocation: 0 file:///home/ben/Projects/sheetloaf/test/samples/styles/file-with-missing-use.scss:1:1> to <FileLocation: 20 file:///home/ben/Projects/sheetloaf/test/samples/styles/file-with-missing-use.scss:1:21> "@use  as *">';
+            content: "Error at line 0 in /home/ben/Projects/sheetloaf/test/samples/styles/file-with-missing-use.scss";
             display: table;
             background-color:#cc0000;
             color:white;
@@ -10,7 +10,7 @@
             font-family:sans-serif
         }
         body:after { 
-            content: "Can't find stylesheet to import.";
+            content: "@use 'template' as *;  ----- Can't find stylesheet to import.";
             display: table;
             background-color:#0e70b0;
             color:white;
