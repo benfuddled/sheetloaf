@@ -13,7 +13,7 @@ import * as fileFinder from './fileFinder';
 import * as sources from './sources';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.20.1", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.20.2", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
