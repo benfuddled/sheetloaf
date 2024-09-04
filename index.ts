@@ -85,6 +85,7 @@ sheetloaf
     )
     .option('--error-css', 'Emit a CSS file when an error occurs during compilation (this is the default option).')
     .option('--no-error-css', 'Do not emit a CSS file when an error occurs during compilation.')
+    .option('--silence-deprecation <TYPE>', 'This option tells Sass to silence a particular type of deprecation.')
     .option('-I, --load-path <PATHS>', 'Adds an additional load path for Sass to look for stylesheets.')
     .option('-p, --pkg-importer <TYPE>', `Built-in importer(s) to use for pkg: URLs.\n[node] - Load files like Node.js package resolution.`)
     .option('-w, --watch', 'Watch stylesheets and recompile when they change.')

@@ -42,7 +42,8 @@ export function generateSassOptions(opts: OptionValues): Options<"sync"> {
         loadPaths: opts.loadPath ? opts.loadPath.split(',') : [],
         sourceMap: opts.sourceMap === false ? false : true,
         sourceMapIncludeSources: opts.sourceMap === false ? false : true,
-        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : []
+        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : [],
+        silenceDeprecations: opts.silenceDeprecation ? opts.silenceDeprecation.split(','): []
     };
 }
 
@@ -52,6 +53,7 @@ export function generateSassOptionsAsync(opts: OptionValues): Options<"async"> {
         loadPaths: opts.loadPath ? opts.loadPath.split(',') : [],
         sourceMap: opts.sourceMap === false ? false : true,
         sourceMapIncludeSources: opts.sourceMap === false ? false : true,
-        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : []
+        importers: opts.pkgImporter === 'node' ? [new NodePackageImporter()] : [],
+        silenceDeprecations: opts.silenceDeprecation ? opts.silenceDeprecation.split(','): []
     };
 }
