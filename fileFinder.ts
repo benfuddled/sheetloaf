@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import picomatch from 'picomatch';
-import fg from 'fast-glob';
+import {globSync} from 'glob';
 
 export function getAllFilesPathsFromSources(input: string[], callback: (expanded: string[]) => void) {
     let sourcesCompleted: number = 0;
@@ -49,11 +49,8 @@ export function getAllFilesPathsFromSources(input: string[], callback: (expanded
 }
 
 function getGlobPaths(glob: string, callback: (expanded: string[]) => void) {
-    let expanded = fg
-        .sync(glob, {
-            dot: true
-        })
-        .map((entry) => path.normalize(entry));
+    let expanded = globSync(glob).map((entry) => path.normalize(entry));
+    
     callback(expanded);
 }
 

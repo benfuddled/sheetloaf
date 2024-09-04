@@ -41,39 +41,42 @@ Options for use with --dir:
           in the output directory, for use with --dir
 
 Sass options:
-  -s, --style         Output style. Possible values are "expanded",      [string]
-                      or "compressed". Default: "expanded".
-  --[no-]source-map   Whether to generate source maps. Default is on.   [boolean]
-  --embed-source-map  Tells Sass to embed the contents of the source    [boolean]
-                      map file in the generated CSS, rather than
-                      creating a separate file and linking to it
-                      from the CSS.
-  --embed-sources     Embed the entire contents of the Sass files that  [boolean]
-                      contributed to the generated CSS in the source map.
-                      This may produce very large source maps, but it
-                      guarantees that the source will be available on
-                      any computer no matter how the CSS is served.
-  -–source-map-urls   Controls how the source maps that Sass generates   [string]
-                      link back to the Sass files that contributed to
-                      the generated CSS. Possible values are "relative"
-                      or "absolute". Default: "relative".
-  --[no-]error-css    This flag tells Sass whether to emit a CSS file   [boolean]
-                      when an error occurs during compilation. This
-                      CSS file describes the error in a comment and in
-                      the content property of body::before, so that
-                      you can see the error message in the browser
-                      without needing to switch back to the terminal.
-  -I, --load-path     Adds an additional load path for Sass to look      [string]
-                      for stylesheets.
-  -p, --pkg-importer  Built-in importer(s) to use for pkg: URLs.         [string]
-                      [node] Load files like Node.js package resolution.
+  -s, --style           Output style. Possible values are "expanded",      [string]
+                        or "compressed". Default: "expanded".
+  --[no-]source-map     Whether to generate source maps. Default is on.   [boolean]
+  --embed-source-map    Tells Sass to embed the contents of the source    [boolean]
+                        map file in the generated CSS, rather than
+                        creating a separate file and linking to it
+                        from the CSS.
+  --embed-sources       Embed the entire contents of the Sass files that  [boolean]
+                        contributed to the generated CSS in the source map.
+                        This may produce very large source maps, but it
+                        guarantees that the source will be available on
+                        any computer no matter how the CSS is served.
+  -–source-map-urls     Controls how the source maps that Sass generates   [string]
+                        link back to the Sass files that contributed to
+                        the generated CSS. Possible values are "relative"
+                        or "absolute". Default: "relative".
+  --silence-deprecation This option tells Sass to silence a particular     [string]
+                        type of deprecation warning if you wish to 
+                        temporarily ignore the deprecation.
+  -I, --load-path       Adds an additional load path for Sass to look      [string]
+                        for stylesheets.
+  -p, --pkg-importer    Built-in importer(s) to use for pkg: URLs.         [string]
+                        [node] Load files like Node.js package resolution.
 
 Advanced options:
-  --poll    Use polling for file watching. Can optionally pass polling [boolean]
-            interval; default 100 ms
-  --config  Set a custom directory to look for a config file            [string]
-  --async   Use Sass's compileAsyc/compileStringAsync functions.       [boolean]
-            This will be slower in most cases.
+  --poll            Use polling for file watching. Can optionally pass   [boolean]
+                    polling interval; default 100 ms
+  --async           Use Sass's compileAsyc/compileStringAsync functions. [boolean]
+                    This will be slower in most cases.
+  --[no-]error-css  This flag tells Sass whether to emit a CSS file      [boolean]
+                    when an error occurs during compilation. This
+                    CSS file describes the error in a comment and in
+                    the content property of body::before, so that
+                    you can see the error message in the browser
+                    without needing to switch back to the terminal.
+  --config          Set a custom directory to look for a config file      [string]
 
 Misc:
   -v, --version  Show version number                                   [boolean]
