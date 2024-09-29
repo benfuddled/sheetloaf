@@ -48,7 +48,7 @@
 		"postcss": "^8.4.0"
 	},
 	"dependencies": {
-		"chokidar": "^3.6.0",
+		"chokidar": "^4.0.1",
 		"commander": "^9.4.0",
 		"glob": "^11.0.0",
 		"minimatch": "^10.0.1",
