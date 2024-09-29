@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-// import picomatch from 'picomatch';
 import {globSync} from 'glob';
 
 export function getAllFilesPathsFromSources(input: string[], callback: (expanded: string[]) => void) {

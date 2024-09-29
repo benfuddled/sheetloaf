@@ -1,6 +1,6 @@
 {
 	"name": "sheetloaf",
-	"version": "1.21.0",
+	"version": "1.22.0",
 	"description": "freshmade stylesheets for the whole family.",
 	"main": "./dist/index.js",
 	"bin": {
@@ -49,11 +49,10 @@
 		"postcss": "^8.4.0"
 	},
 	"dependencies": {
-		"chokidar": "^3.6.0",
+		"chokidar": "^4.0.1",
 		"commander": "^9.4.0",
 		"glob": "^11.0.0",
 		"picocolors": "^1.0.1",
-		"picomatch": "^4.0.2",
-		"sass": "^1.78.0"
+		"sass": "^1.79.4"
 	}
 }
