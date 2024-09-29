@@ -11,9 +11,10 @@ import postcss from 'postcss';
 import * as configs from './configs';
 import * as fileFinder from './fileFinder';
 import * as sources from './sources';
+import { globSync } from 'glob';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.21.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.22.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -137,8 +138,9 @@ function renderPartially(source: string[], fileName: string) {
 
 function watch(source: string[]) {
     if (sheetloaf.opts().watch === true) {
+        const toWatch = globSync(source[0].split(','));
         chokidar
-            .watch(source[0].split(','), {
+            .watch(toWatch, {
                 usePolling: sheetloaf.opts().poll !== undefined,
                 interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
                 ignoreInitial: true,

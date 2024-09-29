@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import picomatch from 'picomatch';
 import {globSync} from 'glob';
 
 export function getAllFilesPathsFromSources(input: string[], callback: (expanded: string[]) => void) {
@@ -8,50 +7,33 @@ export function getAllFilesPathsFromSources(input: string[], callback: (expanded
     let filePaths: string[] = [];
 
     for (let i = 0; i < input.length; i++) {
-        let isGlob, isDir, isFile = false;
+        const result = globSync(input[i], { withFileTypes: true});
 
-        isGlob = picomatch.scan(input[i]).isGlob;
-        if (isGlob === true) {
-            getGlobPaths(input[i], (files) => {
-                filePaths.push(...files);
-                sourcesCompleted++;
-                if (sourcesCompleted === input.length) {
-                    callback([...new Set(filePaths)].sort());
-                }
-            });
-        } else {
+        // If user has supplied a directory, we do an extra step and read all files from directory.
+        if (result.length === 1 && result[0].isDirectory()) {
             try {
-                isDir = fs.lstatSync(path.normalize(input[i])).isDirectory();
-                isFile = fs.lstatSync(path.normalize(input[i])).isFile();
-
-                if (isFile) {
-                    getGlobPaths(input[i], (files) => {
-                        filePaths.push(...files);
-                        sourcesCompleted++;
-                        if (sourcesCompleted === input.length) {
-                            callback([...new Set(filePaths)].sort());
-                        }
-                    });
-                } else if (isDir) {
-                    getAllFilePathsInDir(input[i], (files) => {
-                        filePaths.push(...files);
-                        sourcesCompleted++;
-                        if (sourcesCompleted === input.length) {
-                            callback([...new Set(filePaths)].sort());
-                        }
-                    });
-                }
+                getAllFilePathsInDir(input[i], (files) => {
+                    filePaths.push(...files);
+                    sourcesCompleted++;
+                    if (sourcesCompleted === input.length) {
+                        callback([...new Set(filePaths)].sort());
+                    }
+                });
             } catch (err) {
                 throw err;
             }
+        } else {
+            for (const entry of result) {
+                if (entry.isFile()) {
+                    filePaths.push(path.normalize(entry.relative()));
+                }
+            }
+            sourcesCompleted++;
+            if (sourcesCompleted === input.length) {
+                callback([...new Set(filePaths)].sort());
+            }
         }
     }
-}
-
-function getGlobPaths(glob: string, callback: (expanded: string[]) => void) {
-    let expanded = globSync(glob).map((entry) => path.normalize(entry));
-    
-    callback(expanded);
 }
 
 function getAllFilePathsInDir(dir: string, callback: (files: string[]) => void) {
