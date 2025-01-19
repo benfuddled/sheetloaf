@@ -14,7 +14,7 @@ import * as sources from './sources';
 import { globSync } from 'glob';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.23.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.24.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
