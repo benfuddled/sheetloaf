@@ -34,11 +34,11 @@
 	},
 	"homepage": "https://github.com/benfuddled/sheetloaf#readme",
 	"devDependencies": {
-		"@types/mocha": "^9.1.1",
+		"@types/mocha": "^10.0.10",
 		"@types/node": "^18.6.3",
 		"autoprefixer": "^10.4.19",
 		"bootstrap": "^5.3.3",
-		"mocha": "^9.2.2",
+		"mocha": "^11.1.0",
 		"postcss": "^8.4.38",
 		"postcss-custom-properties": "^13.3.10",
 		"ts-node": "^10.9.1",
