@@ -1,5 +1,5 @@
 import path from "path";
-import { CompileResult } from "sass";
+import { CompileResult } from "sass-embedded";
 import { fileURLToPath } from "url";
 
 let sourcesChecker: SassSources[] = [];

@@ -5,7 +5,7 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import sass, { Options } from 'sass';
+import { AsyncCompiler, Compiler, initAsyncCompiler, initCompiler, Options } from 'sass-embedded';
 import postcss from 'postcss';
 
 import * as configs from './configs';
@@ -14,15 +14,15 @@ import * as sources from './sources';
 import { globSync } from 'glob';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.25.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.26.0-beta.1", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
 
-let sassCompiler: sass.Compiler;
-let sassAsyncCompiler: sass.AsyncCompiler;
+let sassCompiler: Compiler;
+let sassAsyncCompiler: AsyncCompiler;
 
 sheetloaf
     .arguments('[sources...]')
@@ -35,9 +35,9 @@ sheetloaf
             postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
         }
         if (sheetloaf.opts().async === true) {
-            sassAsyncCompiler = await sass.initAsyncCompiler();
+            sassAsyncCompiler = await initAsyncCompiler();
         } else {
-            sassCompiler = sass.initCompiler();
+            sassCompiler = initCompiler();
         }
         if (source.length > 0) {
             // If source is provided, we ignore pipes.
