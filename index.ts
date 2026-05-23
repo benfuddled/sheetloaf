@@ -5,7 +5,7 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import sass, { Options } from 'sass';
+import sass, { initCompiler, initAsyncCompiler, Options } from 'sass-embedded';
 import postcss from 'postcss';
 
 import * as configs from './configs';
@@ -14,7 +14,7 @@ import * as sources from './sources';
 import { globSync } from 'glob';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.25.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.26.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -35,9 +35,9 @@ sheetloaf
             postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
         }
         if (sheetloaf.opts().async === true) {
-            sassAsyncCompiler = await sass.initAsyncCompiler();
+            sassAsyncCompiler = await initAsyncCompiler();
         } else {
-            sassCompiler = sass.initCompiler();
+            sassCompiler = initCompiler();
         }
         if (source.length > 0) {
             // If source is provided, we ignore pipes.
@@ -264,6 +264,9 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 }
             } else {
                 process.stdout.write(postedResult.css);
+                if (!sheetloaf.opts().watch) {
+                    process.exit();
+                }
             }
         })
         .catch((err) => {
@@ -271,6 +274,9 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 console.log(color.red(err));
             } else {
                 process.stderr.write(err);
+            }
+            if (!sheetloaf.opts().watch) {
+                process.exit();
             }
         });
 }
@@ -301,6 +307,7 @@ function sassErrorCatcher(e: any, destination: string) {
 
     if (!sheetloaf.opts().watch && (process.exitCode == null || process.exitCode === 0)) {
         process.exitCode = 1;
+        process.exit();
     }
 }
 

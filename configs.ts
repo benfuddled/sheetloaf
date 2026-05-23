@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { AcceptedPlugin } from "postcss";
-import { Options, NodePackageImporter } from "sass";
+import { Options, NodePackageImporter } from "sass-embedded";
 import { OptionValues } from "commander";
 
 /**
