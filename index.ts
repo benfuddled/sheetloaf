@@ -5,7 +5,7 @@ import chokidar from 'chokidar';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import sass, { Options } from 'sass';
+import sass, { initCompiler, initAsyncCompiler, Options } from 'sass-embedded';
 import postcss from 'postcss';
 
 import * as configs from './configs';
@@ -35,15 +35,16 @@ sheetloaf
             postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
         }
         if (sheetloaf.opts().async === true) {
-            sassAsyncCompiler = await sass.initAsyncCompiler();
+            sassAsyncCompiler = await initAsyncCompiler();
         } else {
-            sassCompiler = sass.initCompiler();
+            sassCompiler = initCompiler();
         }
         if (source.length > 0) {
             // If source is provided, we ignore pipes.
             renderAllFiles(source);
             watch(source);
         } else if (!process.stdin.isTTY) {
+            // TODO, this hangs.
             // see github.com/tj/commander.js/issues/137
             let stdin = '';
             process.stdin.on('readable', () => {
