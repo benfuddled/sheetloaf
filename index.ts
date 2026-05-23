@@ -265,6 +265,9 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 }
             } else {
                 process.stdout.write(postedResult.css);
+                if (!sheetloaf.opts().watch) {
+                    process.exit();
+                }
             }
         })
         .catch((err) => {
@@ -272,6 +275,9 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                 console.log(color.red(err));
             } else {
                 process.stderr.write(err);
+            }
+            if (!sheetloaf.opts().watch) {
+                process.exit();
             }
         });
 }
@@ -302,6 +308,7 @@ function sassErrorCatcher(e: any, destination: string) {
 
     if (!sheetloaf.opts().watch && (process.exitCode == null || process.exitCode === 0)) {
         process.exitCode = 1;
+        process.exit();
     }
 }
 
