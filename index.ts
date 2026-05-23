@@ -44,7 +44,6 @@ sheetloaf
             renderAllFiles(source);
             watch(source);
         } else if (!process.stdin.isTTY) {
-            // TODO, this hangs.
             // see github.com/tj/commander.js/issues/137
             let stdin = '';
             process.stdin.on('readable', () => {
