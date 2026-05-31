@@ -21,12 +21,14 @@
 	"files": [
 		"dist/*.js"
 	],
+
 	"keywords": [
 		"scss",
 		"css",
 		"sass",
 		"processor"
 	],
+	"type": "module",
 	"author": "Benjamin Richardson",
 	"license": "MIT",
 	"bugs": {
@@ -42,7 +44,7 @@
 		"postcss": "^8.5.15",
 		"postcss-custom-properties": "^13.3.10",
 		"ts-node": "^10.9.2",
-		"typescript": "^4.7.4"
+		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
 		"postcss": "^8.5.15"

@@ -1,8 +1,11 @@
 import path from "path";
 import fs from "fs";
-import { AcceptedPlugin } from "postcss";
-import { Options, NodePackageImporter } from "sass-embedded";
-import { OptionValues } from "commander";
+import { type AcceptedPlugin } from "postcss";
+import { type Options, NodePackageImporter } from "sass-embedded";
+import { type OptionValues } from "commander";
+
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
 /**
  * Generates an object used for postcss configuration.

@@ -7,12 +7,12 @@ export function getAllFilesPathsFromSources(input: string[], callback: (expanded
     let filePaths: string[] = [];
 
     for (let i = 0; i < input.length; i++) {
-        const result = globSync(input[i], { withFileTypes: true});
+        const result = globSync(input[i]!, { withFileTypes: true});
 
         // If user has supplied a directory, we do an extra step and read all files from directory.
-        if (result.length === 1 && result[0].isDirectory()) {
+        if (result.length === 1 && result[0] && result[0].isDirectory()) {
             try {
-                getAllFilePathsInDir(input[i], (files) => {
+                getAllFilePathsInDir(input[i]!, (files) => {
                     filePaths.push(...files);
                     sourcesCompleted++;
                     if (sourcesCompleted === input.length) {

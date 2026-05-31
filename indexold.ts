@@ -14,7 +14,7 @@ import * as sources from './sources';
 import { globSync } from 'glob';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.26.0", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.26.1", '-v, --version', 'Print the version of Sheetloaf.');
 
 let usingStdin: boolean = false;
 let postcssConfig: configs.postcssConfigFile = {
@@ -42,7 +42,9 @@ sheetloaf
         if (source.length > 0) {
             // If source is provided, we ignore pipes.
             renderAllFiles(source);
-            watch(source);
+            if (sheetloaf.opts().watch === true) {
+                watch(source);
+            }
         } else if (!process.stdin.isTTY) {
             // see github.com/tj/commander.js/issues/137
             let stdin = '';
@@ -95,14 +97,19 @@ sheetloaf
     .option('-u, --use <PLUGINS>', 'List of postcss plugins to use. Will cause sheetloaf to ignore any config files.')
     .option('--async', `Use sass' asynchronous API. This may be slower.`);
 sheetloaf.parse(process.argv);
- 
+
 function renderAllFiles(source: string[]) {
-    fileFinder.getAllFilesPathsFromSources(source[0].split(','), function (entries) {
-        entries.forEach(function (fileName) {
-            if (path.basename(fileName).charAt(0) !== '_') {
-                renderSass(fileName);
-            }
-        });
+    fileFinder.getAllFilesPathsFromSources(source[0].split(','), (entries) => {
+        const filesToRender = entries.filter((fileName) => path.basename(fileName).charAt(0) !== '_');
+        let rendered = 0;
+        filesToRender.forEach(async (fileName) => {
+            renderSass(fileName).then(() => {
+                rendered++;
+                if (rendered == filesToRender.length) {
+                    console.log('yo we done!!!');
+                }
+            });
+        })
     });
 }
 
@@ -137,34 +144,33 @@ function renderPartially(source: string[], fileName: string) {
 }
 
 function watch(source: string[]) {
-    if (sheetloaf.opts().watch === true) {
-        const toWatch = globSync(source[0].split(','));
-        chokidar
-            .watch(toWatch, {
-                usePolling: sheetloaf.opts().poll !== undefined,
-                interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
-                ignoreInitial: true,
-                awaitWriteFinish: {
-                    stabilityThreshold: 1500,
-                    pollInterval: 100
-                }
-            })
-            .on('change', (changed) => {
-                console.log(`File changed: ${changed}`);
+    const toWatch = globSync(source[0].split(','));
+    chokidar
+        .watch(toWatch, {
+            usePolling: sheetloaf.opts().poll !== undefined,
+            interval: typeof sheetloaf.opts().poll === 'number' ? sheetloaf.opts().poll : 100,
+            ignoreInitial: true,
+            awaitWriteFinish: {
+                stabilityThreshold: 1500,
+                pollInterval: 100
+            }
+        })
+        .on('change', (changed) => {
+            console.log(`File changed: ${changed}`);
 
-                renderPartially(source, changed);
-            })
-            .on('add', (added) => {
-                console.log(`File added: ${added}`);
+            renderPartially(source, changed);
+        })
+        .on('add', (added) => {
+            console.log(`File added: ${added}`);
 
-                // Clear out old info.
-                sources.clearSourcesChecker();
-                renderAllFiles(source);
-            });
-    }
+            // Clear out old info.
+            sources.clearSourcesChecker();
+            renderAllFiles(source);
+        });
+
 }
 
-async function renderSass(fileName: string) {
+async function renderSass(fileName: string): Promise<string> {
     console.log(`Rendering ${fileName}...`);
 
     const destination = fileFinder.buildDestinationPath(
@@ -179,16 +185,25 @@ async function renderSass(fileName: string) {
         if (sheetloaf.opts().async === true) {
             const options: Options<"async"> = configs.generateSassOptionsAsync(sheetloaf.opts());
             const result = await sassAsyncCompiler.compileAsync(fileName, options);
-            renderPost(fileName, destination, result);
             sources.addResultToSourcesChecker(fileName, result);
+            renderPost(fileName, destination, result);
+            return new Promise((resolve, reject) => {
+                resolve("done!!!!");
+            });
         } else {
             const options: Options<"sync"> = configs.generateSassOptions(sheetloaf.opts());
             const result = sassCompiler.compile(fileName, options);
-            renderPost(fileName, destination, result);
             sources.addResultToSourcesChecker(fileName, result);
+            renderPost(fileName, destination, result);
+            return new Promise((resolve, reject) => {
+                resolve("done!!!!");
+            });
         }
     } catch (e: any) {
         sassErrorCatcher(e, destination);
+        return new Promise((resolve, reject) => {
+            resolve("done!!!!");
+        });
     }
 }
 
@@ -216,7 +231,7 @@ async function renderSassFromStdin(text: string) {
     }
 }
 
-function renderPost(fileName: string, destination: string, sassResult: any) {
+function renderPost(fileName: string, destination: string, sassResult: any): Promise<string> {
     let postcssMapOptions: any = {
         annotation: true,
         prev: sassResult.sourceMap,
@@ -268,16 +283,25 @@ function renderPost(fileName: string, destination: string, sassResult: any) {
                     process.exit();
                 }
             }
+            return new Promise((resolve, reject) => {
+                resolve("postcss rendered");
+            });
         })
         .catch((err) => {
             if (destination !== '') {
                 console.log(color.red(err));
+                return new Promise((resolve, reject) => {
+                    reject("postcss rendering failed");
+                });
             } else {
                 process.stderr.write(err);
             }
             if (!sheetloaf.opts().watch) {
                 process.exit();
             }
+            return new Promise((resolve, reject) => {
+                reject("postcss rendering failed");
+            });
         });
 }
 
