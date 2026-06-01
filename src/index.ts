@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { Command, type OptionValues } from 'commander';
 import chokidar from 'chokidar';
 import color from 'picocolors';
+import { Command, type OptionValues } from 'commander';
 import fs from 'fs';
+import { globSync } from 'glob';
 import postcss from 'postcss';
 import path from 'path';
 import { initCompiler, initAsyncCompiler, type Compiler, type AsyncCompiler, type Options, type CompileResult } from 'sass-embedded';
@@ -19,8 +20,6 @@ let postcssConfig: configs.postcssConfigFile = {
     plugins: []
 };
 
-let compiler: CompWrapper;
-
 interface CWrap {
     sync?: Compiler;
     async?: AsyncCompiler;
@@ -29,25 +28,40 @@ interface CWrap {
 class CompWrapper {
     private initialized: boolean = false;
     private usingStdin: boolean = false;
+    private source: string;
+    private entries: string[];
     private options: OptionValues;
     private compiler: CWrap = {};
 
-    init(options: OptionValues, usingStdin: boolean): Promise<string> {
+    init(options: OptionValues, source: string = ""): Promise<string> {
         this.options = options;
-        this.usingStdin = usingStdin;
+        this.source = source;
+
         return new Promise((resolve, reject) => {
-            if (this.options.async === true) {
-                initAsyncCompiler().then((compiler) => {
-                    this.compiler.async = compiler;
-                    this.initialized = true;
-                    resolve("Compiler initialized.")
-                }).catch((e) => {
-                    reject(e);
+            if (this.source.length > 0) {
+                fileFinder.getAllFilesPathsFromSources(this.source.split(','), (entries: string[]) => {
+                    this.entries = entries;
+
+                    if (this.entries.length > 0 && this.entries[0]) {
+                        this.usingStdin = false;
+                    } else {
+                        this.usingStdin = true;
+                    }
+
+                    if (this.options.async === true) {
+                        initAsyncCompiler().then((compiler) => {
+                            this.compiler.async = compiler;
+                            this.initialized = true;
+                            resolve("Compiler initialized.")
+                        }).catch((e) => {
+                            reject(e);
+                        });
+                    } else {
+                        this.compiler.sync = initCompiler();
+                        this.initialized = true;
+                        resolve("Compiler initialized.")
+                    }
                 });
-            } else {
-                this.compiler.sync = initCompiler();
-                this.initialized = true;
-                resolve("Compiler initialized.")
             }
         });
     }
@@ -61,12 +75,46 @@ class CompWrapper {
         }
     }
 
-    render(fileName: string): Promise<string> {
+    watch() {
+        if (this.source.length > 0) {
+            const toWatch = globSync(this.source!.split(','));
+            chokidar
+                .watch(toWatch, {
+                    usePolling: this.options.poll !== undefined,
+                    interval: typeof this.options.poll === 'number' ? this.options.poll : 100,
+                    ignoreInitial: true,
+                    awaitWriteFinish: {
+                        stabilityThreshold: 1500,
+                        pollInterval: 100
+                    }
+                })
+                .on('change', (changed) => {
+                    console.log(`File changed: ${changed}`);
+
+                    this.getFilesToRender(changed).then((filesToRender) => {
+                        filesToRender.forEach((fileName) => {
+                            this.render(fileName);
+                        })
+                    });
+                })
+                .on('add', (added) => { // TODO limit to 1 per second.
+                    console.log(`File added: ${added}`);
+
+                    // Clear out old info.
+                    sources.clearSourcesChecker();
+                    this.renderAll();
+                });
+        }
+    }
+
+    render(fileNameOrString: string = ''): Promise<string> {
         return new Promise((resolve, reject) => {
-            console.log(`Rendering ${fileName}...`);
+            if (this.usingStdin === false) {
+                console.log(`Rendering ${fileNameOrString}...`);
+            }
 
             const destination = fileFinder.buildDestinationPath(
-                fileName,
+                fileNameOrString,
                 this.options.output,
                 this.options.dir,
                 this.options.base,
@@ -74,8 +122,8 @@ class CompWrapper {
                 this.usingStdin
             );
 
-            this.renderSass(fileName).then((sassResult) => {
-                this.renderPost(fileName, destination, sassResult).then((postedResult) => {
+            this.renderSass(fileNameOrString).then((sassResult) => {
+                this.renderPost(fileNameOrString, destination, sassResult).then((postedResult) => {
                     this.writeOut(postedResult, destination);
                 }).catch((err) => {
                     if (destination !== '') {
@@ -90,22 +138,50 @@ class CompWrapper {
         });
     }
 
-    private renderSass(fileName: string): Promise<CompileResult> {
+    renderAll(): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const filesToRender = this.entries.filter((fileName) => path.basename(fileName).charAt(0) !== '_');
+            let rendered = 0;
+            filesToRender.forEach((fileName) => {
+                this.render(fileName).then(() => {
+                    rendered++;
+                    if (rendered == filesToRender.length) {
+                        resolve("All files rendered");
+                    }
+                });
+            })
+        });
+    }
+
+    private renderSass(fileNameOrString: string): Promise<CompileResult> {
         return new Promise((resolve, reject) => {
             if (this.compiler.async) {
                 const options: Options<"async"> = configs.generateSassOptionsAsync(this.options);
-                this.compiler.async.compileAsync(fileName, options).then((result) => {
-                    sources.addResultToSourcesChecker(fileName, result);
-                    resolve(result);
-                }).catch((err) => {
-                    reject(err);
-                });
+                if (this.usingStdin === false) {
+                    this.compiler.async.compileAsync(fileNameOrString, options).then((result) => {
+                        sources.addResultToSourcesChecker(fileNameOrString, result);
+                        resolve(result);
+                    }).catch((err) => {
+                        reject(err);
+                    });
+                } else {
+                    this.compiler.async.compileStringAsync(fileNameOrString, options).then((result) => {
+                        resolve(result);
+                    }).catch((err) => {
+                        reject(err);
+                    });
+                }
             } else if (this.compiler.sync) {
                 try {
                     const options: Options<"sync"> = configs.generateSassOptions(this.options);
-                    const result = this.compiler.sync.compile(fileName, options);
-                    sources.addResultToSourcesChecker(fileName, result);
-                    resolve(result);
+                    if (this.usingStdin === false) {
+                        const result = this.compiler.sync.compile(fileNameOrString, options);
+                        sources.addResultToSourcesChecker(fileNameOrString, result);
+                        resolve(result);
+                    } else {
+                        const result = this.compiler.sync.compile(fileNameOrString, options);
+                        resolve(result);
+                    }
                 } catch (err) {
                     reject(err);
                 }
@@ -113,7 +189,7 @@ class CompWrapper {
         });
     }
 
-    private renderPost(fileName: string, destination: string, sassResult: any): Promise<any> {
+    private renderPost(fileNameOrString: string, destination: string, sassResult: any): Promise<any> {
         return new Promise((resolve, reject) => {
             let postcssMapOptions: any = {
                 annotation: true,
@@ -129,7 +205,7 @@ class CompWrapper {
 
             postcss(postcssConfig.plugins)
                 .process(sassResult.css.toString(), {
-                    from: fileName,
+                    from: fileNameOrString,
                     to: destination,
                     map: postcssMapOptions
                 })
@@ -139,6 +215,47 @@ class CompWrapper {
                 .catch((err) => {
                     reject(err);
                 });
+        });
+    }
+
+    private getFilesToRender(fileChanged: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            let filesToRender: string[] = [];
+            if (path.basename(fileChanged).charAt(0) !== '_') {
+                filesToRender.push(fileChanged);
+                resolve(filesToRender);
+            } else {
+                let partialExistsInSassSources = false;
+                let ind = 0;
+                while (ind < sources.getChecker().length) {
+                    const toCheck = sources.getChecker()[ind];
+
+                    if (toCheck?.containsPartial(fileChanged)) {
+                        partialExistsInSassSources = true;
+                        filesToRender.push(toCheck.getMain());
+                    }
+                    ind = ind + 1;
+                }
+
+                if (partialExistsInSassSources === false) {
+                    // SassSources are built with sass's CompileResult object when
+                    // sheetloaf initially runs. However, if compilation fails, the 
+                    // SassSource will not be generated for that particular file.
+                    // That means if a partial is later fixed to not error out and
+                    // it will not render at all.
+                    // We therefore check for this condition and rebuild everything
+                    // if it doesn't exist.
+                    sources.clearSourcesChecker();
+                    fileFinder.getAllFilesPathsFromSources(this.source.split(','), (entries) => {
+                        entries.forEach((entry) => {
+                            filesToRender.push(entry);
+                            resolve(filesToRender);
+                        });
+                    });
+                } else {
+                    resolve(filesToRender);
+                }
+            }
         });
     }
 
@@ -240,10 +357,6 @@ class CompWrapper {
     }
 }
 
-function watch(source: string[]) {
-    return null;
-}
-
 sheetloaf
     .arguments('[sources...]')
     .description('📃🍞 Compile Sass to CSS and transform the output using PostCSS, all in one command.')
@@ -254,41 +367,29 @@ sheetloaf
         } else {
             postcssConfig = configs.generatePostcssConfigFromFile(sheetloaf.opts().config);
         }
-        compiler = new CompWrapper();
+        const compiler = new CompWrapper();
 
         // If source is provided, we ignore pipes.
         if (source.length > 0 && source[0]) {
-            compiler.init(sheetloaf.opts(), false);
-            fileFinder.getAllFilesPathsFromSources(source[0].split(','), (entries: string[]) => {
-                const filesToRender = entries.filter((fileName) => path.basename(fileName).charAt(0) !== '_');
-                let rendered = 0;
-                filesToRender.forEach((fileName) => {
-                    compiler.render(fileName).then(() => {
-                        rendered++;
-                        if (rendered == filesToRender.length) {
-                            if (sheetloaf.opts().watch === true) {
-                                watch(source);
-                            } else {
-                                compiler.dispose();
-                            }
-                        }
-                    });
-                })
+            compiler.init(sheetloaf.opts(), source[0]).then(() => {
+                compiler.renderAll().then(() => {
+                    compiler.watch();
+                });
             });
         } else if (!process.stdin.isTTY) {
-            //compiler.init(sheetloaf.opts(), true);
-            // see github.com/tj/commander.js/issues/137
-            // let stdin = '';
-            // process.stdin.on('readable', () => {
-            //     var chunk = process.stdin.read();
-            //     if (chunk !== null) {
-            //         stdin += chunk;
-            //     }
-            // });
-            // process.stdin.on('end', () => {
-            //     usingStdin = true;
-            //     renderSassFromStdin(stdin);
-            // });
+            compiler.init(sheetloaf.opts).then(() => {
+                //see github.com/tj/commander.js/issues/137
+                let stdin = '';
+                process.stdin.on('readable', () => {
+                    var chunk = process.stdin.read();
+                    if (chunk !== null) {
+                        stdin += chunk;
+                    }
+                });
+                process.stdin.on('end', () => {
+                    compiler.render(stdin);
+                });
+            });
         }
     });
 
