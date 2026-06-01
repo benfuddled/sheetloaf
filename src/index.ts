@@ -69,7 +69,7 @@ class CompWrapper {
     dispose() {
         if (this.initialized) {
             this.compiler.async?.dispose();
-            this.compiler.async?.dispose();
+            this.compiler.sync?.dispose();
         } else {
             throw 'Compiler not initialized, therefore could not dispose.';
         }
@@ -124,16 +124,20 @@ class CompWrapper {
 
             this.renderSass(fileNameOrString).then((sassResult) => {
                 this.renderPost(fileNameOrString, destination, sassResult).then((postedResult) => {
-                    this.writeOut(postedResult, destination);
+                    this.writeOut(postedResult, destination).then(() => {
+                        resolve("File rendered and written successfully.");
+                    });
                 }).catch((err) => {
                     if (destination !== '') {
                         console.log(color.red(err));
                     } else {
                         process.stderr.write(err);
                     }
+                    resolve("Error in file.");
                 });
             }).catch((e) => {
                 this.sassErrorOut(e, destination);
+                resolve("Error in file.");
             });
         });
     }
@@ -323,37 +327,45 @@ class CompWrapper {
         return css;
     }
 
-    private writeOut(postedResult: postcss.Result<postcss.Root>, destination: string) {
-        postedResult.warnings().forEach((warn) => {
-            process.stderr.write(warn.toString());
-        });
-
-        if (destination !== '') {
-            try {
-                fs.mkdirSync(path.dirname(destination), {
-                    recursive: true
-                });
-            } catch (err: any) {
-                if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err;
-            }
-
-            fs.writeFile(destination, postedResult.css, (err) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    // success case, the file was saved
-                    console.log(color.green(`Successfully written to ${destination}`));
-                }
+    private writeOut(postedResult: postcss.Result<postcss.Root>, destination: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            postedResult.warnings().forEach((warn) => {
+                process.stderr.write(warn.toString());
             });
 
-            if (postedResult.map) {
-                fs.writeFile(destination + '.map', postedResult.map.toString(), (err) => {
-                    if (err) throw err;
+            if (destination !== '') {
+                try {
+                    fs.mkdirSync(path.dirname(destination), {
+                        recursive: true
+                    });
+                } catch (err: any) {
+                    if (err.code !== 'EEXIST' || err.code !== 'EISDIR') throw err;
+                }
+
+                fs.writeFile(destination, postedResult.css, (err) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        // success case, the file was saved
+                        console.log(color.green(`Successfully written to ${destination}`));
+                        resolve("Written to file.");
+                    }
                 });
+
+                if (postedResult.map) {
+                    fs.writeFile(destination + '.map', postedResult.map.toString(), (err) => {
+                        if (err) {
+                            throw err;
+                        } else {
+                            resolve("Written to file.");
+                        };
+                    });
+                }
+            } else {
+                process.stdout.write(postedResult.css);
+                resolve("Written to file.");
             }
-        } else {
-            process.stdout.write(postedResult.css);
-        }
+        });
     }
 }
 
@@ -373,7 +385,11 @@ sheetloaf
         if (source.length > 0 && source[0]) {
             compiler.init(sheetloaf.opts(), source[0]).then(() => {
                 compiler.renderAll().then(() => {
-                    compiler.watch();
+                    if (sheetloaf.opts().watch) {
+                        compiler.watch();
+                    } else {
+                        compiler.dispose();
+                    }
                 });
             });
         } else if (!process.stdin.isTTY) {
@@ -387,7 +403,9 @@ sheetloaf
                     }
                 });
                 process.stdin.on('end', () => {
-                    compiler.render(stdin);
+                    compiler.render(stdin).then(() => {
+                        compiler.dispose();
+                    });
                 });
             });
         }
