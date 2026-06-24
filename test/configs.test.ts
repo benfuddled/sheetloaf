@@ -1,5 +1,9 @@
-import assert from 'assert';
-import * as configs from '../configs';
+import assert from 'node:assert';
+import {describe, it} from 'node:test';
+import * as configs from '../src/configs.ts';
+
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
 describe('When CLI Arguments Need Further Parsing - configs', () => {
     describe('configs.generatePostcssConfig() Test', () => {

@@ -8,15 +8,16 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-    //"types": [],
-    // For nodejs:
     "lib": [
       "esnext"
     ],
     "types": [
       "node"
     ],
-    // and npm install -D @types/node
+    // Allow JS files to be imported from TS and vice versa
+		"allowJs": true,
+		// Use correct ESM import behavior
+		"esModuleInterop": true,
     // Other Outputs
     "sourceMap": true,
     "declaration": true,

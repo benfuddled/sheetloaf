@@ -1,5 +1,6 @@
-import assert from 'assert';
-import * as fileFinder from '../fileFinder';
+import assert from 'node:assert';
+import {describe, it} from 'node:test';
+import * as fileFinder from '../src/fileFinder.ts';
 
 describe('When CLI Arguments Need Further Parsing - fileFinder', () => {
     describe('fileFinder.getAllFilesPathsFromSources() Test', () => {
