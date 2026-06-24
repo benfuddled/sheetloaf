@@ -40,7 +40,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    // Ben's Options
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "strictPropertyInitialization": false,
