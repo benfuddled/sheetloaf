@@ -69,7 +69,7 @@ Advanced options:
   --poll            Use polling for file watching. Can optionally pass   [boolean]
                     polling interval; default 100 ms
   --async           Use Sass's compileAsyc/compileStringAsync functions. [boolean]
-                    This will be slower in most cases.
+                    This will improve performance for multiple files.
   --[no-]error-css  This flag tells Sass whether to emit a CSS file      [boolean]
                     when an error occurs during compilation. This
                     CSS file describes the error in a comment and in

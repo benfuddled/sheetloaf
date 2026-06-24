@@ -1,5 +1,5 @@
 import path from "path";
-import { CompileResult } from "sass-embedded";
+import { type CompileResult } from "sass-embedded";
 import { fileURLToPath } from "url";
 
 let sourcesChecker: SassSources[] = [];
@@ -60,8 +60,8 @@ export function addResultToSourcesChecker(fileName: string, result: CompileResul
     let ind = 0;
     while (ind < sourcesChecker.length && resultExistsInChecker === false) {
 
-        if (sourcesChecker[ind].getAbsoluteMain() === path.resolve(fileName)) {
-            sourcesChecker[ind].setSources(result.loadedUrls);
+        if (sourcesChecker[ind]?.getAbsoluteMain() === path.resolve(fileName)) {
+            sourcesChecker[ind]?.setSources(result.loadedUrls);
             resultExistsInChecker = true;
         }
         ind = ind + 1;
