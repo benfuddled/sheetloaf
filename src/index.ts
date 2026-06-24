@@ -62,6 +62,21 @@ class CompWrapper {
                         resolve("Compiler initialized.")
                     }
                 });
+            } else {
+                this.usingStdin = true;
+                if (this.options.async === true) {
+                    initAsyncCompiler().then((compiler) => {
+                        this.compiler.async = compiler;
+                        this.initialized = true;
+                        resolve("Compiler initialized.")
+                    }).catch((e) => {
+                        reject(e);
+                    });
+                } else {
+                    this.compiler.sync = initCompiler();
+                    this.initialized = true;
+                    resolve("Compiler initialized.")
+                }
             }
         });
     }
@@ -183,7 +198,7 @@ class CompWrapper {
                         sources.addResultToSourcesChecker(fileNameOrString, result);
                         resolve(result);
                     } else {
-                        const result = this.compiler.sync.compile(fileNameOrString, options);
+                        const result = this.compiler.sync.compileString(fileNameOrString, options);
                         resolve(result);
                     }
                 } catch (err) {
@@ -393,7 +408,7 @@ sheetloaf
                 });
             });
         } else if (!process.stdin.isTTY) {
-            compiler.init(sheetloaf.opts).then(() => {
+            compiler.init(sheetloaf.opts()).then(() => {
                 //see github.com/tj/commander.js/issues/137
                 let stdin = '';
                 process.stdin.on('readable', () => {

@@ -44,7 +44,7 @@
 		"typescript": "^6.0.3"
 	},
 	"peerDependencies": {
-		"postcss": "^8.5.15"
+		"postcss": "^8.5.0"
 	},
 	"dependencies": {
 		"chokidar": "^5.0.0",
