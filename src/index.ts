@@ -14,7 +14,7 @@ import * as fileFinder from './fileFinder.ts';
 import * as sources from './sources.ts';
 
 const sheetloaf = new Command();
-sheetloaf.version("1.26.1", '-v, --version', 'Print the version of Sheetloaf.');
+sheetloaf.version("1.27.0", '-v, --version', 'Print the version of Sheetloaf.');
 
 let postcssConfig: configs.postcssConfigFile = {
     plugins: []
